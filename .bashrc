@@ -1,3 +1,9 @@
+# If not running interactively, for example when executing a script,
+# don't do anything
+[[ $- != *i* ]] && return
+
+export BASH_SILENCE_DEPRECATION_WARNING=1
+
 export NVM_DIR="$HOME/.nvm"
 [ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"
 alias ll='ls -alF'
@@ -9,7 +15,7 @@ export PATH="$PATH":"$HOME/.pub-cache/bin"
 
 # Pyenv initialization
 if command -v pyenv 1>/dev/null 2>&1; then
-  eval "$(pyenv init -)"
+	eval "$(pyenv init -)"
 fi
 
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
@@ -22,4 +28,8 @@ export CPPFLAGS="-I/opt/homebrew/opt/openssl@1.1/include"
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
-
+alias v=nvim
+alias t=tmux
+alias ..="cd .."
+alias phd="cd /Users/einezahl/Documents/Obsidian/phd"
+alias dot="cd /Users/einezahl/.dotfiles"
