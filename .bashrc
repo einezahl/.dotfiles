@@ -33,3 +33,7 @@ alias t=tmux
 alias ..="cd .."
 alias phd="cd /Users/einezahl/Documents/Obsidian/phd"
 alias dot="cd /Users/einezahl/.dotfiles"
+
+eval "$(zoxide init bash)"
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
