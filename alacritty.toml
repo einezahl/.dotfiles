@@ -4,3 +4,5 @@ size = 14
 [font.normal]
 family = "UbuntuMono Nerd Font"
 
+[window]
+decorations = "none"
