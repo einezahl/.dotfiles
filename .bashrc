@@ -4,6 +4,8 @@
 
 export BASH_SILENCE_DEPRECATION_WARNING=1
 
+PS1='\W\$ '
+
 export NVM_DIR="$HOME/.nvm"
 [ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"
 alias ll='ls -alF'
@@ -32,7 +34,7 @@ alias v=nvim
 alias t=tmux
 alias ..="cd .."
 alias phd="cd /Users/einezahl/Documents/Obsidian/phd"
-alias dot="cd /Users/einezahl/.dotfiles"
+alias dot="cd ~/.dotfiles"
 
 eval "$(zoxide init bash)"
 
