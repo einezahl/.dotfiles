@@ -10,3 +10,4 @@ if [ -r ~/.bashrc ]; then
 fi
 
 export XDG_CONFIG_HOME="$HOME"/.dotfiles
+. "$HOME/.cargo/env"

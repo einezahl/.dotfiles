@@ -28,6 +28,9 @@ export CPPFLAGS="-I/opt/homebrew/opt/openssl@1.1/include"
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
+# Export default dataset location
+export DATASET_ROOT=/Users/einezahl/data
+
 alias v=nvim
 alias t=tmux
 alias ..="cd .."
@@ -37,3 +40,7 @@ alias dot="cd /Users/einezahl/.dotfiles"
 eval "$(zoxide init bash)"
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+. "$HOME/.cargo/env"
+
+PS1="\W:$"
+alias srplot='cd /Users/einezahl/dev/phd/super_resolution/sr_plots'
