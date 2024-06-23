@@ -30,6 +30,9 @@ export PATH=$PATH:$GOPATH/bin
 
 alias v=nvim
 alias t=tmux
+alias cd=z
 alias ..="cd .."
 alias phd="cd /Users/einezahl/Documents/Obsidian/phd"
 alias dot="cd /Users/einezahl/.dotfiles"
+alias sv="source .venv/bin/activate"
+
