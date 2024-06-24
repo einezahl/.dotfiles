@@ -19,12 +19,12 @@ mkdir -p "$OLD_CONFIG"
 [ -f "$HOME"/.bash_profile ] && mv "$HOME"/.bash_profile "$OLD_CONFIG"/.bash_profile
 [ -f "$HOME"/.bashrc ] && mv "$HOME"/.bashrc "$OLD_CONFIG"/.bashrc
 [ -f "$HOME"/.tmux.conf ] && mv "$HOME"/.tmux.conf "$OLD_CONFIG"/.tmux.conf
-[ -f "$XDG_CONFIG_HOME"/nvim ] && mv "$XDG_CONFIG_HOME"/nvim "$OLD_CONFIG"/nvim
-[ -f "$XDG_CONFIG_HOME"/dunst ] && mv "$XDG_CONFIG_HOME"/dunst "$OLD_CONFIG"/dunst
-[ -f "$XDG_CONFIG_HOME"/i3 ] && mv "$XDG_CONFIG_HOME"/i3 "$OLD_CONFIG"/i3
-[ -f "$XDG_CONFIG_HOME"/picom ] && mv "$XDG_CONFIG_HOME"/picom "$OLD_CONFIG"/picom
-[ -f "$XDG_CONFIG_HOME"/polybar ] && mv "$XDG_CONFIG_HOME"/polybar "$OLD_CONFIG"/polybar
-[ -f "$XDG_CONFIG_HOME"/rofi ] && mv "$XDG_CONFIG_HOME"/rofi "$OLD_CONFIG"/rofi
+[ -d "$XDG_CONFIG_HOME"/nvim ] && mv "$XDG_CONFIG_HOME"/nvim "$OLD_CONFIG"/nvim
+[ -d "$XDG_CONFIG_HOME"/dunst ] && mv "$XDG_CONFIG_HOME"/dunst "$OLD_CONFIG"/dunst
+[ -d "$XDG_CONFIG_HOME"/i3 ] && mv "$XDG_CONFIG_HOME"/i3 "$OLD_CONFIG"/i3
+[ -d "$XDG_CONFIG_HOME"/picom ] && mv "$XDG_CONFIG_HOME"/picom "$OLD_CONFIG"/picom
+[ -d "$XDG_CONFIG_HOME"/polybar ] && mv "$XDG_CONFIG_HOME"/polybar "$OLD_CONFIG"/polybar
+[ -d "$XDG_CONFIG_HOME"/rofi ] && mv "$XDG_CONFIG_HOME"/rofi "$OLD_CONFIG"/rofi
 
 ln -sf "$PWD/alacritty.toml" "$XDG_CONFIG_HOME"/alacritty/alacritty.toml
 ln -sf "$PWD/.bash_profile" "$HOME"/.bash_profile
