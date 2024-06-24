@@ -36,6 +36,7 @@ alias dot="cd $HOME/.dotfiles"
 alias sv="source .venv/bin/activate"
 
 eval "$(zoxide init bash)"
+eval "$(ssh-agent -s)"
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 . "$HOME/.cargo/env"
