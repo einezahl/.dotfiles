@@ -9,7 +9,7 @@ set $mod Mod1
 font pango:Ubuntu Nerd Font 11
 
 # Run the script to set keyboard layouts
-exec --no-startup-id /home/admd/.config/i3/set_keyboard.sh
+exec --no-startup-id $HOME/.config/i3/set_keyboard.sh
 
 ### Runnig apps in background ###
 
@@ -23,7 +23,7 @@ exec_always --no-startup-id mpd &
 exec_always --no-startup-id dunst &
 
 # set wallpaper with fed
-exec_always feh --bg-scale /home/admd/Pictures/wallpaper/background.png
+exec_always feh --bg-scale $HOME/Pictures/wallpaper/background.png
 
 # launch polybar
 exec_always --no-startup-id killall -q

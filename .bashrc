@@ -32,7 +32,12 @@ alias v=nvim
 alias t=tmux
 alias cd=z
 alias ..="cd .."
-alias phd="cd /Users/einezahl/Documents/Obsidian/phd"
-alias dot="cd /Users/einezahl/.dotfiles"
+alias dot="cd $HOME/.dotfiles"
 alias sv="source .venv/bin/activate"
 
+eval "$(zoxide init bash)"
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+. "$HOME/.cargo/env"
+
+PS1="\W:$"
