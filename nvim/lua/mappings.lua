@@ -16,3 +16,6 @@ map('n', '<leader>;', ':lua require("harpoon.ui").nav_file(4)<CR>', default_opts
 
 
 map("n", "<leader>u", "UndotreeToggle<CR>", default_opts)
+
+local opts = { noremap = true, silent = true }
+vim.api.nvim_set_keymap("n", "<Leader>nf", ":lua require('neogen').generate()<CR>", opts)
