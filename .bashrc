@@ -8,6 +8,10 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"
 alias ll='ls -alF'
 
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
 # Flutter
 export PATH="$PATH:/Users/einezahl/dev/tools/flutter/bin"
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
@@ -33,10 +37,11 @@ alias t=tmux
 alias cd=z
 alias ..="cd .."
 alias dot="cd $HOME/.dotfiles"
-alias sv="source .venv/bin/activate"
+alias spy="source .venv/bin/activate"
 
 eval "$(zoxide init bash)"
-eval "$(ssh-agent -s)"
+eval "$(ssh-agent -s)" &> /dev/null
+eval "$(pyenv virtualenv-init -)"
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 . "$HOME/.cargo/env"
