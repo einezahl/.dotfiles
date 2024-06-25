@@ -40,18 +40,21 @@ return {
   {
     "nvim-lua/plenary.nvim",
   },
-
   {
       "ThePrimeagen/harpoon",
       branch = "harpoon2",
-      dependencies = { "nvim-lua/plenary.nvim" },
-      config = function()
-        require("harpoon").setup()
-      end,
+      dependencies = { "nvim-lua/plenary.nvim" }
   },
-
   {
       "mbbill/undotree",
   },
-
+  {
+      "danymat/neogen",
+      config = true,
+      languages = {
+          python = {
+              template = { annotation_convention = "numpydoc" }
+          }
+      }
+  }
 }
