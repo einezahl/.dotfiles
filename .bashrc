@@ -38,6 +38,7 @@ alias cd=z
 alias ..="cd .."
 alias dot="cd $HOME/.dotfiles"
 alias spy="source .venv/bin/activate"
+alias ppy="export PYTHONPATH=$(pwd):$PYTHONPATH"
 
 eval "$(zoxide init bash)"
 eval "$(ssh-agent -s)" &> /dev/null
