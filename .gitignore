@@ -1,3 +1,10 @@
 *lock.json
 lazyvim.json
 **.log
+
+.android/
+Android Open Source Project/
+eas-cli-nodejs/
+Google/
+lazygit/
+mimeapps.list
