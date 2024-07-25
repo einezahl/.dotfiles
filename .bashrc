@@ -33,6 +33,7 @@ export DATASET_ROOT=/Users/einezahl/data
 
 alias v=nvim
 alias t=tmux
+alias cd=z
 alias ..="cd .."
 alias phd="cd /Users/einezahl/Documents/Obsidian/phd"
 alias dot="cd /Users/einezahl/.dotfiles"
