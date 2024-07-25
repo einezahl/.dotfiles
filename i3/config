@@ -130,6 +130,8 @@ bindsym $mod+z exec "rofi -show  -modi ':rofi-bookmarks' -no-default-confi
 bindsym $mod+x exec "rofi-powermenu"
 bindsym $mod+c exec "gnome-screenshot -f ~/Pictures/Screenshots/screenshot_$(date +%Y-%m-%d_%H-%M-%S).png"
 
+bindsym $mod+n exec "dunstctl close-all"
+
 # take a screenshot
 # bindsym Pause exec screenshot -sa
 # bindsym Print exec screenshot -sf
