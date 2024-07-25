@@ -15,38 +15,46 @@ return {
     end,
   },
 
+  --
   {
   	"williamboman/mason.nvim",
   	opts = {
   		ensure_installed = {
   			"lua-language-server", "stylua",
-  			"html-lsp", "css-lsp" , "prettier"
+  			"html-lsp", "css-lsp" , "prettier",
+        "jedi-language-server"
   		},
   	},
   },
-
+  --
   {
   	"nvim-treesitter/nvim-treesitter",
   	opts = {
   		ensure_installed = {
   			"vim", "lua", "vimdoc",
-       "html", "css", "typescript",
+       "html", "css"
   		},
   	},
   },
+
   {
-  'nvim-telescope/telescope.nvim', tag = '0.1.6',
-    dependencies = { 'nvim-lua/plenary.nvim' }
+    "nvim-lua/plenary.nvim",
   },
   {
-    'windwp/nvim-autopairs',
-    event = "InsertEnter",
-    config = true
+      "ThePrimeagen/harpoon",
+      branch = "harpoon2",
+      dependencies = { "nvim-lua/plenary.nvim" }
   },
   {
-  'windwp/nvim-ts-autotag',
-    config = function()
-      require('nvim-ts-autotag').setup()
-    end,
+      "mbbill/undotree",
+  },
+  {
+      "danymat/neogen",
+      config = true,
+      languages = {
+          python = {
+              template = { annotation_convention = "numpydoc" }
+          }
+      }
   }
 }
