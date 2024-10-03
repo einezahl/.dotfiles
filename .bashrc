@@ -45,3 +45,10 @@ eval "$(zoxide init bash)"
 
 PS1="\W:$"
 alias srplot='cd /Users/einezahl/dev/phd/super_resolution/sr_plots'
+
+LOCALENV="$HOME/.config/localenv/"
+if [ -d "$LOCALENV" ]; then
+    for i in $(find -L "$LOCALENV" -type f); do
+        source "$i"
+    done
+fi
