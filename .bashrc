@@ -13,7 +13,7 @@ export PYENV_ROOT="$HOME/.pyenv"
 eval "$(pyenv init -)"
 
 # Flutter
-export PATH="$PATH:/Users/einezahl/dev/tools/flutter/bin"
+export PATH="$PATH:$HOME/dev/tools/flutter/bin"
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 export PATH="$PATH":"$HOME/.pub-cache/bin"
 
@@ -52,3 +52,4 @@ eval "$(pyenv virtualenv-init -)"
 . "$HOME/.cargo/env"
 
 PS1="\W:$"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
