@@ -3,4 +3,7 @@ configstore/
 lazyvim.json
 lazygit/
 glow/
+crossstore/
+nvim-thomas/
+nvim_chad/
 

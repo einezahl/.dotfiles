@@ -29,14 +29,18 @@ export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 
 # Export default dataset location
-export DATASET_ROOT=/Users/einezahl/data
+export DATASET_ROOT_PATH="/Users/einezahl/sciebo - Reclik, Tom (08QXP2@rwth-aachen.de)@rwth-aachen.sciebo.de/datasets"
 
-alias v=nvim
-alias t=tmux
 alias cd=z
 alias ..="cd .."
 alias phd="cd /Users/einezahl/Documents/Obsidian/phd"
 alias dot="cd /Users/einezahl/.dotfiles"
+alias ssh="TERM=xterm-256color ssh"
+alias copy="pbcopy"
+alias cenv="python3 -m venv .venv"
+alias ppy="export PYTHONPATH='${PYTHONPATH}:${PWD}' && \
+    source .venv/bin/activate && \
+    echo 'Exported PYTHONPATH'"
 
 eval "$(zoxide init bash)"
 
@@ -44,7 +48,6 @@ eval "$(zoxide init bash)"
 . "$HOME/.cargo/env"
 
 PS1="\W:$"
-alias srplot='cd /Users/einezahl/dev/phd/super_resolution/sr_plots'
 
 LOCALENV="$HOME/.config/localenv/"
 if [ -d "$LOCALENV" ]; then
