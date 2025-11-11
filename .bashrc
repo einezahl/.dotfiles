@@ -3,24 +3,16 @@
 [[ $- != *i* ]] && return
 
 export BASH_SILENCE_DEPRECATION_WARNING=1
+export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"
 alias ll='ls -alF'
 
-export PYENV_ROOT="$HOME/.pyenv"
-[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
 # Flutter
 export PATH="$PATH:$HOME/dev/tools/flutter/bin"
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 export PATH="$PATH":"$HOME/.pub-cache/bin"
-
-# Pyenv initialization
-if command -v pyenv 1>/dev/null 2>&1; then
-	eval "$(pyenv init -)"
-fi
 
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
 
@@ -46,10 +38,12 @@ alias ssh="TERM=xterm-256color ssh"
 
 eval "$(zoxide init bash)"
 eval "$(ssh-agent -s)" &> /dev/null
-eval "$(pyenv virtualenv-init -)"
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 . "$HOME/.cargo/env"
 
 PS1="\W:$"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+export DATASET_ROOT_PATH='/home/admd/sciebo - Reclik, Tom (08QXP2@rwth-aachen.de)@rwth-aachen.sciebo.de/datasets/'
+export TERM=xterm-256color
