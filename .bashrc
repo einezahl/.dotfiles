@@ -47,3 +47,4 @@ PS1="\W:$"
 
 export DATASET_ROOT_PATH='/home/admd/sciebo - Reclik, Tom (08QXP2@rwth-aachen.de)@rwth-aachen.sciebo.de/datasets/'
 export TERM=xterm-256color
+export DOCKER_HOST=unix://$HOME/.docker/desktop/docker.sock
