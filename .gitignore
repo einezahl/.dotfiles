@@ -4,10 +4,13 @@ lazyvim.json
 
 .android/
 Android Open Source Project/
+BraveSoftware/
 eas-cli-nodejs/
 Google/
 lazygit/
 mimeapps.list
+pulse/
+Ultralytics/
 
 other_configurations/
 crossnote/
