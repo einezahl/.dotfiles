@@ -8,7 +8,7 @@ Personal dotfiles for a Linux (i3) + occasional macOS setup. This repo is the so
 
 ## Setup
 
-- `./install.sh` — installs system packages (i3, dunst, polybar, picom, rofi, pyenv). Debian/Ubuntu only.
+- `./install.sh` — installs system packages (i3, dunst, polybar, picom, rofi). Debian/Ubuntu only.
 - `./setup.sh` — symlinks configs into `$XDG_CONFIG_HOME` and `$HOME`. Existing files are moved to `$XDG_CONFIG_HOME/old_config` first. Must be run from the repo root (uses `$PWD`).
 
 Neovim bootstraps itself via lazy.nvim on first launch (`nvim/lua/lazy-bootstrap.lua`); there is no separate install step for plugins.

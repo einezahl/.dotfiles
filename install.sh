@@ -8,5 +8,3 @@ sudo apt install dunst
 sudo apt install polybar
 sudo apt install picom
 sudo apt install rofi
-
-curl https://pyenv.run | bash
