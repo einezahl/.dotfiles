@@ -16,3 +16,9 @@ Ultralytics/
 
 other_configurations/
 crossnote/
+
+# Machine flag and per-machine symlinks
+.machine
+i3/machine/current.conf
+rofi/machine.rasi
+polybar/cuts/machine.ini

@@ -7,7 +7,6 @@
 
 
 configuration {
-	font:							"0xProto Nerd Font 22";
     show-icons:                     true;
 	icon-theme: 					"Papirus";
     display-drun: 					"";
@@ -17,6 +16,7 @@ configuration {
 	sidebar-mode: 					false;
 }
 
+@import "machine.rasi"
 @import "colors.rasi"
 
 window {

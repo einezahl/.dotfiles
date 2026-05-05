@@ -48,3 +48,20 @@ ln -sf "$PWD/rofi" "$XDG_CONFIG_HOME"/rofi
 ln -sf "$PWD/CLAUDE.md" "$HOME"/.claude/CLAUDE.md
 ln -sf "$PWD/ml-projects.md" "$HOME"/.claude/ml-projects.md
 
+# Per-machine profile: read $PWD/.machine (4k|hd). Prompt once if missing.
+if [ ! -f "$PWD/.machine" ]; then
+	echo "No .machine flag found. Pick this machine's profile:"
+	select machine in 4k hd; do
+		case "$machine" in
+			4k|hd) echo "$machine" > "$PWD/.machine"; break ;;
+		esac
+	done
+fi
+machine="$(tr -d '[:space:]' < "$PWD/.machine")"
+case "$machine" in
+	4k|hd) ;;
+	*) echo "Unknown machine flag '$machine' in $PWD/.machine (expected 4k or hd)" >&2; exit 1 ;;
+esac
+ln -sf "$PWD/i3/machine/${machine}.conf" "$PWD/i3/machine/current.conf"
+ln -sf "$PWD/rofi/machine-${machine}.rasi" "$PWD/rofi/machine.rasi"
+

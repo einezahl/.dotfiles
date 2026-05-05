@@ -3,6 +3,22 @@
 dir="$HOME/.config/polybar"
 themes=(`ls --hide="launch.sh" $dir`)
 
+# Pick font/bar-width values based on the per-machine flag in ~/.dotfiles/.machine.
+# These get exported so polybar's ${env:VAR:-default} interpolation picks them up.
+machine_flag="$(cat "$HOME/.dotfiles/.machine" 2>/dev/null | tr -d '[:space:]')"
+case "$machine_flag" in
+	4k)
+		export POLYBAR_FONT_TEXT=20
+		export POLYBAR_FONT_PWR=38
+		export POLYBAR_FONT_FILL=24
+		export POLYBAR_FONT_SMALL=14
+		export POLYBAR_BAR_WIDTH=10
+		;;
+	hd|"")
+		# HD is the default; values match config.ini fallbacks.
+		;;
+esac
+
 launch_bar() {
 	# Terminate already running bar instances
 	killall -q polybar

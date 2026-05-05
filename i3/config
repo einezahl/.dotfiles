@@ -5,17 +5,9 @@
 # set mod
 set $mod Mod4
 
-# set font
-font pango:Ubuntu Nerd Font 22
-
-# Display settings, set source to display port which is necessary for 
-# 4K with fast refresh rate. To adjust for the size adjustments increase
-# the dpi and cursor size. Then lastly turn of deep sleep for the monitor
-# to not loose connection when locking the PC.
-exec --no-startup-id xrandr --output DP-0 --mode 3840x2160 --rate 143.99
-# exec --no-startup-id xrandr --output HDMI-0 --mode 1920x1080 --rate 60
-exec --no-startup-id xrdb -merge ~/.Xresources
-exec --no-startup-id xset s off -dpms
+# Per-machine settings (font, xrandr, etc). The active profile is picked
+# by setup.sh via the `.machine` flag at the repo root and symlinked here.
+include $HOME/.dotfiles/i3/machine/current.conf
 
 ### Runnig apps in background ###
 
@@ -48,7 +40,6 @@ floating_modifier $mod
 bindsym $mod+Return exec alacritty
 bindsym $mod+Shift+Return exec kitty
 bindsym $mod+e exec i3-msg exit
-bindsym $mod+' exec --no-startup-id xrandr --output DP-4 --mode 3840x2160 --rate 143.99
 
 set $Locker i3lock && sleep 1
 
@@ -140,7 +131,6 @@ bindsym $mod+s exec "rofi -show drun -no-default-config -config ~/.config/rofi/f
 bindsym $mod+z exec "rofi -show  -modi ':rofi-bookmarks' -no-default-config -config ~/.config/rofi/main.rasi"
 bindsym $mod+x exec "rofi-powermenu"
 bindsym $mod+c exec --no-startup-id flameshot gui
-bindsym $mod+Shift+c exec --no-startup-id flameshot full -p $HOME/Pictures/
 
 bindsym $mod+n exec "dunstctl close-all"
 
