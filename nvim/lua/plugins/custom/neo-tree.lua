@@ -11,7 +11,7 @@ return {
   },
   cmd = 'Neotree',
   keys = {
-    { '\\', ':Neotree toggle<CR>', { desc = 'NeoTree toggle' } },
+    { '\\', ':Neotree reveal toggle<CR>', { desc = 'NeoTree toggle (reveal current file)' } },
   },
   opts = {
     event_handlers = {

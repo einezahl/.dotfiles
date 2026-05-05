@@ -7,7 +7,7 @@
 
 
 configuration {
-	font:							"0xProto Nerd Font 11";
+	font:							"0xProto Nerd Font 22";
     show-icons:                     true;
 	icon-theme: 					"Papirus";
     display-drun: 					"";
