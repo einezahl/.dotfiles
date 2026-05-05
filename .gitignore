@@ -1,13 +1,18 @@
 *lock.json
 lazyvim.json
 **.log
+.claude/**.local.json
 
 .android/
 Android Open Source Project/
+BraveSoftware/
 eas-cli-nodejs/
 Google/
 lazygit/
 mimeapps.list
+mlflow/
+pulse/
+Ultralytics/
 
 other_configurations/
 crossnote/
