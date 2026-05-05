@@ -1,6 +1,7 @@
 *lock.json
 lazyvim.json
 **.log
+.claude/**.local.json
 
 .android/
 Android Open Source Project/
