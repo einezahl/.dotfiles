@@ -5,6 +5,14 @@
 export BASH_SILENCE_DEPRECATION_WARNING=1
 export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
 
+# Flush history after every command so entries survive non-graceful exits
+# (e.g. bash inside a detached tmux session being killed at reboot).
+shopt -s histappend
+HISTSIZE=100000
+HISTFILESIZE=200000
+HISTCONTROL=ignoreboth
+PROMPT_COMMAND='history -a'${PROMPT_COMMAND:+; $PROMPT_COMMAND}
+
 export NVM_DIR="$HOME/.nvm"
 [ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"
 alias ll='ls -alF'
