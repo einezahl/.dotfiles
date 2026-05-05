@@ -54,6 +54,9 @@ create_session() {
         
         tmux new-window -t $selected_name -n 'git' -c "$HOME"
         tmux send-keys -t $selected_name:git "mountpoint -q $local_mount || sshfs $ssh_host:$remote_path $local_mount -o reconnect,ServerAliveInterval=15 && cd $local_mount && $local_setup && lazygit" C-m
+
+        tmux new-window -t $selected_name -n 'claude' -c "$HOME"
+        tmux send-keys -t $selected_name:claude "mountpoint -q $local_mount || sshfs $ssh_host:$remote_path $local_mount -o reconnect,ServerAliveInterval=15 && cd $local_mount && $local_setup && claude" C-m
     else
         setup_commands="source .venv/bin/activate; export PYTHONPATH=\$PYTHONPATH:$selected"
         
@@ -66,6 +69,9 @@ create_session() {
         
         tmux new-window -t $selected_name -n 'git' -c $selected
         tmux send-keys -t $selected_name:git "$setup_commands; lazygit" C-m
+
+        tmux new-window -t $selected_name -n 'claude' -c $selected
+        tmux send-keys -t $selected_name:claude "$setup_commands; claude" C-m
     fi
     
     tmux select-window -t $selected_name:edit
