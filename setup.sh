@@ -2,10 +2,12 @@ export XDG_CONFIG_HOME="$HOME"/.config
 OLD_CONFIG="$XDG_CONFIG_HOME"/old_config
 mkdir -p "$XDG_CONFIG_HOME"/bash
 mkdir -p "$XDG_CONFIG_HOME"/alacritty
+mkdir -p "$XDG_CONFIG_HOME"/kitty
 mkdir -p "$HOME"/.claude
 mkdir -p "$OLD_CONFIG"
 
 [ -L "$XDG_CONFIG_HOME"/alacritty/alacritty.toml ] && unlink "$XDG_CONFIG_HOME"/alacritty/alacritty.toml
+[ -L "$XDG_CONFIG_HOME"/kitty/kitty.conf ] && unlink "$XDG_CONFIG_HOME"/kitty/kitty.conf
 [ -L "$HOME"/.bash_profile ] && unlink "$HOME"/.bash_profile
 [ -L "$HOME"/.bashrc ] && unlink "$HOME"/.bashrc
 [ -L "$HOME"/.tmux.conf ] && unlink "$HOME"/.tmux.conf
@@ -19,6 +21,7 @@ mkdir -p "$OLD_CONFIG"
 [ -L "$HOME"/.claude/ml-projects.md ] && unlink "$HOME"/.claude/ml-projects.md
 
 [ -f "$XDG_CONFIG_HOME"/alacritty/alacritty.toml ] && mv "$XDG_CONFIG_HOME"/alacritty/alacritty.toml "$OLD_CONFIG"/alacritty/alacritty.toml
+[ -f "$XDG_CONFIG_HOME"/kitty/kitty.conf ] && mv "$XDG_CONFIG_HOME"/kitty/kitty.conf "$OLD_CONFIG"/kitty/kitty.conf
 [ -f "$HOME"/.bash_profile ] && mv "$HOME"/.bash_profile "$OLD_CONFIG"/.bash_profile
 [ -f "$HOME"/.bashrc ] && mv "$HOME"/.bashrc "$OLD_CONFIG"/.bashrc
 [ -f "$HOME"/.tmux.conf ] && mv "$HOME"/.tmux.conf "$OLD_CONFIG"/.tmux.conf
@@ -32,6 +35,7 @@ mkdir -p "$OLD_CONFIG"
 [ -f "$HOME"/.claude/ml-projects.md ] && mv "$HOME"/.claude/ml-projects.md "$OLD_CONFIG"/ml-projects.md
 
 ln -sf "$PWD/alacritty.toml" "$XDG_CONFIG_HOME"/alacritty/alacritty.toml
+ln -sf "$PWD/kitty/kitty.conf" "$XDG_CONFIG_HOME"/kitty/kitty.conf
 ln -sf "$PWD/.bash_profile" "$HOME"/.bash_profile
 ln -sf "$PWD/.bashrc" "$HOME"/.bashrc
 ln -sf "$PWD/.tmux.conf" "$HOME"/.tmux.conf
