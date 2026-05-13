@@ -12,6 +12,7 @@ mkdir -p "$OLD_CONFIG"
 [ -L "$HOME"/.bash_profile ] && unlink "$HOME"/.bash_profile
 [ -L "$HOME"/.bashrc ] && unlink "$HOME"/.bashrc
 [ -L "$HOME"/.zshrc ] && unlink "$HOME"/.zshrc
+[ -L "$HOME"/.p10k.zsh ] && unlink "$HOME"/.p10k.zsh
 [ -L "$HOME"/.tmux.conf ] && unlink "$HOME"/.tmux.conf
 [ -L "$XDG_CONFIG_HOME"/nvim ] && unlink "$XDG_CONFIG_HOME"/nvim
 [ -L "$XDG_CONFIG_HOME"/dunst ] && unlink "$XDG_CONFIG_HOME"/dunst
@@ -27,6 +28,7 @@ mkdir -p "$OLD_CONFIG"
 [ -f "$HOME"/.bash_profile ] && mv "$HOME"/.bash_profile "$OLD_CONFIG"/.bash_profile
 [ -f "$HOME"/.bashrc ] && mv "$HOME"/.bashrc "$OLD_CONFIG"/.bashrc
 [ -f "$HOME"/.zshrc ] && mv "$HOME"/.zshrc "$OLD_CONFIG"/.zshrc
+[ -f "$HOME"/.p10k.zsh ] && mv "$HOME"/.p10k.zsh "$OLD_CONFIG"/.p10k.zsh
 [ -f "$HOME"/.tmux.conf ] && mv "$HOME"/.tmux.conf "$OLD_CONFIG"/.tmux.conf
 [ -d "$XDG_CONFIG_HOME"/nvim ] && mv "$XDG_CONFIG_HOME"/nvim "$OLD_CONFIG"/nvim
 [ -d "$XDG_CONFIG_HOME"/dunst ] && mv "$XDG_CONFIG_HOME"/dunst "$OLD_CONFIG"/dunst
@@ -42,6 +44,7 @@ ln -sf "$PWD/kitty/kitty.conf" "$XDG_CONFIG_HOME"/kitty/kitty.conf
 ln -sf "$PWD/.bash_profile" "$HOME"/.bash_profile
 ln -sf "$PWD/.bashrc" "$HOME"/.bashrc
 ln -sf "$PWD/.zshrc" "$HOME"/.zshrc
+ln -sf "$PWD/.p10k.zsh" "$HOME"/.p10k.zsh
 ln -sf "$PWD/.tmux.conf" "$HOME"/.tmux.conf
 ln -sf "$PWD/nvim" "$XDG_CONFIG_HOME"/nvim
 ln -sf "$PWD/dunst" "$XDG_CONFIG_HOME"/dunst
