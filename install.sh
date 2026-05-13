@@ -1,6 +1,7 @@
 sudo apt update
 sudo apt install i3
 sudo apt install tmux -y
+sudo apt install zsh -y
 
 sudo apt install dunst
 sudo apt install polybar
@@ -90,3 +91,10 @@ cp ~/.local/kitty.app/share/applications/kitty.desktop ~/.local/share/applicatio
 cp ~/.local/kitty.app/share/applications/kitty-open.desktop ~/.local/share/applications/
 sed -i "s|Icon=kitty|Icon=/home/$USER/.local/kitty.app/share/icons/hicolor/256x256/apps/kitty.png|g" ~/.local/share/applications/kitty*.desktop
 sed -i "s|Exec=kitty|Exec=/home/$USER/.local/kitty.app/bin/kitty|g" ~/.local/share/applications/kitty*.desktop
+
+# powerlevel10k theme for zsh (cloned into the dotfiles repo; gitignored)
+if [ ! -d ~/.dotfiles/zsh/powerlevel10k ]; then
+  git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.dotfiles/zsh/powerlevel10k
+fi
+# After install, run `chsh -s $(which zsh)` to set zsh as the login shell,
+# then start a new zsh session and run `p10k configure` to generate ~/.p10k.zsh.
