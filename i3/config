@@ -119,6 +119,9 @@ bindsym $mod+b move workspace to output right
 
 bindsym $mod+Shift+a exec --no-startup-id ~/.dotfiles/scripts/add_anki_card.sh
 
+# bitwarden picker: rofi wrapper around the official `bw` CLI
+bindsym $mod+a exec --no-startup-id ~/.dotfiles/scripts/bw_rofi.sh
+
 # focus the parent container
 #bindsym $mod+a focus parent
 
