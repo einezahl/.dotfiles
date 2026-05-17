@@ -31,6 +31,19 @@ exec_always --no-startup-id $HOME/.config/polybar/launch.sh --cuts
 # start i3 components
 # exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
 exec --no-startup-id nm-applet
+
+# pin specific apps to specific workspaces by WM_CLASS / instance.
+# Applied when the window first appears, so launch order / startup speed
+# doesn't matter — the autostart script can fire everything in parallel.
+# To find the right class for an app: run `xprop WM_CLASS` then click it.
+assign [class="(?i)zotero"]   → number 7
+assign [class="(?i)zen"]      → number 8
+assign [class="(?i)obsidian"] → number 9
+assign [class="(?i)vpnui"]    → number 10
+assign [instance="tmux-sessionizer"] → number 1
+
+# launch desktop apps; the assign rules above route them to the right workspace
+exec --no-startup-id $HOME/.dotfiles/scripts/i3_autostart.sh
 # exec --no-startup-id i3-layouts
 ### Shortcuts ###
 
