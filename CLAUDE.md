@@ -22,6 +22,3 @@ Start with the simplest direct implementation. Only reach for vectorization, sho
 
 - ML / training projects: add `@~/.claude/ml-projects.md` to the project's `CLAUDE.md`. See that file for the rule set.
 
-## Review
-
-Your code will be reviewed by Codex.
