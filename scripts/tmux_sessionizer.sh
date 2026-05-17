@@ -4,7 +4,7 @@ remote_projects=(
     "hpcwork-kair|/hpcwork/tr434677/dev/super_resolution/KAIR|hpc"
 )
 
-local_dirs=$(find $HOME/dev/ -mindepth 3 -maxdepth 3 -type d)
+local_dirs=$(find $HOME/dev/ -mindepth 3 -maxdepth 3 -type d; echo "$HOME/.dotfiles")
 remote_names=$(printf '%s\n' "${remote_projects[@]}" | cut -d'|' -f1 | sed 's/^/[remote] /')
 
 if [[ $# -eq 1 ]]; then
