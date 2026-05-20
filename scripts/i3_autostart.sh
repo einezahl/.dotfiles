@@ -3,6 +3,14 @@
 # `assign` rules in i3/config (matched on WM_CLASS / instance), so order and
 # startup latency don't matter here — fire everything in parallel.
 
+# Apply machine-specific display mode synchronously *before* launching apps.
+# Otherwise alacritty races xrandr and computes font dimensions against the
+# pre-xrandr resolution, producing tiny fonts on 4K until you open a new term.
+machine=$(tr -d '[:space:]' < "$HOME/.dotfiles/.machine" 2>/dev/null || true)
+case "$machine" in
+    4k) xrandr --output DP-0 --mode 3840x2160 --rate 143.99 ;;
+esac
+
 /opt/zotero/zotero &
 flatpak run app.zen_browser.zen &
 obsidian &
