@@ -11,9 +11,24 @@ case "$machine" in
     4k) xrandr --output DP-0 --mode 3840x2160 --rate 143.99 ;;
 esac
 
-/opt/zotero/zotero &
-flatpak run app.zen_browser.zen &
-obsidian &
+# Run "$@" in the background if its first word names an available program.
+# Returns non-zero otherwise, so per-machine candidates can be chained with
+# `||`: the same app is installed differently across machines (snap vs
+# AppImage vs flatpak vs /opt). A machine that lacks every candidate gets a
+# logged warning instead of a silent no-op.
+try_launch() {
+    command -v "$1" > /dev/null 2>&1 || return 1
+    "$@" &
+}
+
+try_launch /opt/zotero/zotero || try_launch /snap/bin/zotero-snap \
+    || echo "i3_autostart: zotero not found" >&2
+
+try_launch flatpak run app.zen_browser.zen \
+    || try_launch "$HOME/tools/browser/zen-x86_64.AppImage" \
+    || echo "i3_autostart: zen not found" >&2
+
+try_launch obsidian || echo "i3_autostart: obsidian not found" >&2
 
 # Tag this terminal with a distinct instance name so the assign rule sends
 # only this specific window to workspace 1 (other alacritty windows are
