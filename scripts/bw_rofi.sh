@@ -2,19 +2,26 @@
 # Keyboard-driven Bitwarden picker built on the official `bw` CLI.
 #
 # Flow on Super+a:
-#   1. If no cached session (or timed out): prompt for master password in rofi,
-#      run `bw unlock`, cache the returned session token in libsecret.
+#   1. Reuse the cached session if it still unlocks the vault; otherwise prompt
+#      for the master password in rofi and acquire a fresh session.
 #   2. Pipe `bw list items` through rofi to pick a login entry.
 #   3. Show an action menu: auto-type, copy password, copy username, copy TOTP,
 #      sync, lock.
 #
-# Session storage: the libsecret keyring (same backing store as gnome-keyring /
-# kwallet). Decrypted automatically when you log in to your session. Cleared
-# explicitly via the "lock" action or after BW_ROFI_TIMEOUT seconds.
+# Why `bw login` instead of `bw unlock`: bw 2026.4.x hands back session tokens
+# from `bw unlock` that the vault then rejects ("Vault is locked"); tokens from
+# `bw login` work. So a cache miss does a full re-login. This needs the account
+# to have NO 2FA, since a non-interactive `bw login` can't answer a 2FA prompt.
+# `bw unlock --check` is still used to validate a cached token — that subcommand
+# only checks a token, it does not mint one, so the bug does not affect it.
+#
+# Session storage: the libsecret keyring (gnome-keyring). Cleared via the
+# "lock" action, or once the cached token no longer unlocks the vault.
 set -euo pipefail
 
 SESSION_TIMEOUT="${BW_ROFI_TIMEOUT:-21600}"   # 6 hours
 CLIP_TIMEOUT="${BW_ROFI_CLIP:-30}"            # seconds
+BW_EMAIL="${BW_ROFI_EMAIL:-tom.reclik@gmail.com}"
 
 ATTR_APP=bw-rofi
 TS_FILE="$HOME/.cache/bw-rofi/session_ts"
@@ -31,11 +38,16 @@ ask_password() {
 }
 
 load_session() {
-    local now ts
+    local now ts token
     [[ -f "$TS_FILE" ]] || return 1
     now=$(date +%s); ts=$(<"$TS_FILE")
     (( now - ts < SESSION_TIMEOUT )) || return 1
-    secret-tool lookup application "$ATTR_APP" 2>/dev/null
+    token=$(secret-tool lookup application "$ATTR_APP" 2>/dev/null) || return 1
+    [[ -n "$token" ]] || return 1
+    # The timestamp is only a cheap pre-filter: a reboot can invalidate a token
+    # well before it expires, so confirm it still unlocks the vault.
+    BW_SESSION="$token" bw unlock --check >/dev/null 2>&1 || return 1
+    printf '%s' "$token"
 }
 
 save_session() {
@@ -48,12 +60,16 @@ clear_session() {
     rm -f "$TS_FILE"
 }
 
-unlock_vault() {
+login_vault() {
     local pw token
     pw=$(ask_password) || exit 0
     [[ -z "$pw" ]] && exit 0
-    token=$(BW_ROFI_PW="$pw" bw unlock --passwordenv BW_ROFI_PW --raw 2>/dev/null) \
-        || die "Could not unlock vault (wrong password or not logged in)"
+    # `bw login` refuses to run while a session is already authenticated, so
+    # drop any existing one first. It is also the only path that yields a
+    # working token on bw 2026.4.x (see header).
+    bw logout >/dev/null 2>&1 || true
+    token=$(BW_ROFI_PW="$pw" bw login "$BW_EMAIL" --passwordenv BW_ROFI_PW --raw 2>/dev/null) \
+        || die "Could not log in (wrong password, or 2FA/captcha required)"
     save_session "$token"
     printf '%s' "$token"
 }
@@ -63,7 +79,7 @@ clear_clipboard_later() {
     disown
 }
 
-BW_SESSION="$(load_session || unlock_vault)"
+BW_SESSION="$(load_session || login_vault)"
 export BW_SESSION
 
 items_json=$(bw list items 2>/dev/null) || die "Could not list vault items"
