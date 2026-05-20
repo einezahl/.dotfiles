@@ -14,7 +14,6 @@ esac
 /opt/zotero/zotero &
 flatpak run app.zen_browser.zen &
 obsidian &
-/opt/cisco/secureclient/bin/vpnui &
 
 # Tag this terminal with a distinct instance name so the assign rule sends
 # only this specific window to workspace 1 (other alacritty windows are
