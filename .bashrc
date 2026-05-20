@@ -26,7 +26,20 @@ alias copy="xclip -sel clip"
 alias ssh="TERM=xterm-256color ssh"
 
 eval "$(zoxide init bash)"
-eval "$(ssh-agent -s)" &> /dev/null
+
+# Reuse an existing ssh-agent across shells instead of spawning one per session.
+SSH_ENV="$HOME/.ssh/agent.env"
+start_agent() {
+  ssh-agent -s | sed 's/^echo /#echo /' > "$SSH_ENV"
+  chmod 600 "$SSH_ENV"
+  . "$SSH_ENV" > /dev/null
+}
+if [ -f "$SSH_ENV" ]; then
+  . "$SSH_ENV" > /dev/null
+  kill -0 "$SSH_AGENT_PID" 2>/dev/null || start_agent
+else
+  start_agent
+fi
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
