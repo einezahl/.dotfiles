@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 export XDG_CONFIG_HOME="$HOME"/.config
 OLD_CONFIG="$XDG_CONFIG_HOME"/old_config
 mkdir -p "$XDG_CONFIG_HOME"/bash
