@@ -85,6 +85,16 @@ bindsym $mod+Down focus down
 bindsym $mod+Up focus up
 bindsym $mod+Right focus right
 
+# 2x2 terminal-grid jump keys. i3_mark_grid.sh stamps the focused workspace's
+# tiled windows with grid1-grid4 marks (top-left to bottom-right); $mod+Ctrl+g
+# re-stamps after rearranging. The jump keys focus a marked window directly,
+# so the diagonal cell is one keypress instead of two.
+bindsym $mod+Ctrl+g exec --no-startup-id ~/.dotfiles/scripts/i3_mark_grid.sh
+bindsym $mod+Ctrl+u [con_mark="grid1"] focus
+bindsym $mod+Ctrl+i [con_mark="grid2"] focus
+bindsym $mod+Ctrl+j [con_mark="grid3"] focus
+bindsym $mod+Ctrl+k [con_mark="grid4"] focus
+
 # move focused window
 bindsym $mod+Shift+j move left
 bindsym $mod+Shift+k move down
