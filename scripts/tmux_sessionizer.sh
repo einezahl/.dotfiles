@@ -77,16 +77,15 @@ create_session() {
     tmux select-window -t $selected_name:edit
 }
 
-tmux_running=$(pgrep tmux)
-
-if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
-    create_session
-    tmux attach-session -t $selected_name
-    exit 0
-fi
-
-if ! tmux has-session -t=$selected_name 2> /dev/null; then
+if ! tmux has-session -t="$selected_name" 2> /dev/null; then
     create_session
 fi
 
-tmux switch-client -t $selected_name
+# switch-client only works from inside a tmux client. A terminal launched
+# outside tmux (e.g. the i3 autostart) must attach instead — otherwise the
+# command exits immediately and takes the terminal window down with it.
+if [[ -n $TMUX ]]; then
+    tmux switch-client -t "$selected_name"
+else
+    tmux attach-session -t "$selected_name"
+fi
