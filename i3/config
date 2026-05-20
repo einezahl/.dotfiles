@@ -39,7 +39,7 @@ exec --no-startup-id nm-applet
 assign [class="(?i)zotero"]   → number 7
 assign [class="(?i)zen"]      → number 8
 assign [class="(?i)obsidian"] → number 9
-assign [class="(?i)vpnui"]    → number 10
+assign [class="(?i)cisco"]    → number 10
 assign [instance="tmux-sessionizer"] → number 1
 
 # launch desktop apps; the assign rules above route them to the right workspace
