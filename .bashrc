@@ -32,3 +32,16 @@ eval "$(ssh-agent -s)" &> /dev/null
 
 export TERM=xterm-256color
 export DOCKER_HOST=unix://$HOME/.docker/desktop/docker.sock
+
+# yazi: `y` launches the file manager and cd's the shell into whatever
+# directory you were in when you quit (Q). Plain `yazi` still works and
+# leaves you in $PWD.
+y() {
+    local tmp cwd
+    tmp=$(mktemp -t "yazi-cwd.XXXXXX")
+    yazi "$@" --cwd-file="$tmp"
+    if cwd=$(command cat -- "$tmp") && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+        builtin cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
+}

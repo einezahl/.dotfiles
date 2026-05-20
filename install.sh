@@ -40,6 +40,19 @@ chmod +x /tmp/bw
 sudo mv /tmp/bw /usr/local/bin/bw
 rm /tmp/bw.zip
 
+# yazi: terminal file manager. Apt ships a stale version; grab the latest
+# pre-built binary from GitHub releases. Recommended companions (zoxide, fzf,
+# ripgrep, jq) are already installed above.
+sudo apt install -y file
+YAZI_VER=$(curl -s https://api.github.com/repos/sxyazi/yazi/releases/latest \
+    | grep -oE '"tag_name": "v[0-9.]+"' | head -1 \
+    | sed -E 's/.*"v([0-9.]+)".*/\1/')
+curl -L -o /tmp/yazi.zip "https://github.com/sxyazi/yazi/releases/download/v${YAZI_VER}/yazi-x86_64-unknown-linux-gnu.zip"
+unzip -o /tmp/yazi.zip -d /tmp/
+sudo mv /tmp/yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/yazi
+sudo mv /tmp/yazi-x86_64-unknown-linux-gnu/ya   /usr/local/bin/ya
+rm -rf /tmp/yazi.zip /tmp/yazi-x86_64-unknown-linux-gnu
+
 # kitty: install from upstream (apt ships stale versions)
 curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 ln -sf ~/.local/kitty.app/bin/kitty ~/.local/bin/kitty
