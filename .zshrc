@@ -33,6 +33,9 @@ setopt HIST_IGNORE_DUPS HIST_IGNORE_SPACE
 # Completion
 autoload -Uz compinit && compinit
 
+# vi-style command-line editing
+bindkey -v
+
 export NVM_DIR="$HOME/.nvm"
 [ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"
 
@@ -52,6 +55,17 @@ eval "$(zoxide init zsh)"
 
 export TERM=xterm-256color
 export DOCKER_HOST=unix://$HOME/.docker/desktop/docker.sock
+export CLAUDE_CODE_NO_FLICKER=1
+
+# Go toolchain and user-installed Go binaries
+export PATH="$PATH:/usr/local/go/bin:$HOME/go/bin"
+
+# opencode CLI
+export PATH="$HOME/.opencode/bin:$PATH"
+
+# Homebrew/Linuxbrew — guarded so machines without it don't error every shell.
+[ -x /home/linuxbrew/.linuxbrew/bin/brew ] && \
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
 
 # Powerlevel10k theme (cloned by install.sh)
 P10K_THEME="$HOME/.dotfiles/zsh/powerlevel10k/powerlevel10k.zsh-theme"
