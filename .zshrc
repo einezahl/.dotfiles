@@ -1,3 +1,20 @@
+# SSH keys via keychain — starts one ssh-agent and reuses it across shells,
+# prompting for passphrases only on the first shell after boot. Every private
+# key in ~/.ssh is detected by its "PRIVATE KEY" header, so this works no
+# matter how the keys are named on a given machine. Must run before the
+# Powerlevel10k instant prompt below, which swallows the console input
+# keychain needs for passphrase prompts.
+ssh_keys=()
+for key in "$HOME"/.ssh/*(N); do
+  [ -f "$key" ] || continue
+  IFS= read -r header < "$key" || continue
+  case "$header" in
+    *"PRIVATE KEY"*) ssh_keys+=("$key") ;;
+  esac
+done
+eval "$(keychain --eval --quiet --agents ssh "${ssh_keys[@]}")"
+unset ssh_keys key header
+
 # Enable Powerlevel10k instant prompt. Must stay near the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -30,22 +47,6 @@ alias copy="xclip -sel clip"
 alias ssh="TERM=xterm-256color ssh"
 
 eval "$(zoxide init zsh)"
-
-# Reuse an existing ssh-agent across shells instead of spawning one per session.
-# Without this, each shell forks a new agent that lingers after exit; kitty's
-# default `confirm_os_window_close` then blocks closing the window.
-SSH_ENV="$HOME/.ssh/agent.env"
-start_agent() {
-  ssh-agent -s | sed 's/^echo /#echo /' > "$SSH_ENV"
-  chmod 600 "$SSH_ENV"
-  . "$SSH_ENV" > /dev/null
-}
-if [ -f "$SSH_ENV" ]; then
-  . "$SSH_ENV" > /dev/null
-  kill -0 "$SSH_AGENT_PID" 2>/dev/null || start_agent
-else
-  start_agent
-fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 

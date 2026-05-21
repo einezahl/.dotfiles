@@ -27,19 +27,20 @@ alias ssh="TERM=xterm-256color ssh"
 
 eval "$(zoxide init bash)"
 
-# Reuse an existing ssh-agent across shells instead of spawning one per session.
-SSH_ENV="$HOME/.ssh/agent.env"
-start_agent() {
-  ssh-agent -s | sed 's/^echo /#echo /' > "$SSH_ENV"
-  chmod 600 "$SSH_ENV"
-  . "$SSH_ENV" > /dev/null
-}
-if [ -f "$SSH_ENV" ]; then
-  . "$SSH_ENV" > /dev/null
-  kill -0 "$SSH_AGENT_PID" 2>/dev/null || start_agent
-else
-  start_agent
-fi
+# SSH keys via keychain — starts one ssh-agent and reuses it across shells,
+# prompting for passphrases only on the first shell after boot. Every private
+# key in ~/.ssh is detected by its "PRIVATE KEY" header, so this works no
+# matter how the keys are named on a given machine.
+ssh_keys=()
+for key in "$HOME"/.ssh/*; do
+  [ -f "$key" ] || continue
+  IFS= read -r header < "$key" || continue
+  case "$header" in
+    *"PRIVATE KEY"*) ssh_keys+=("$key") ;;
+  esac
+done
+eval "$(keychain --eval --quiet --agents ssh "${ssh_keys[@]}")"
+unset ssh_keys key header
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
