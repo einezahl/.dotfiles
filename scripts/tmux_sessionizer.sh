@@ -10,7 +10,41 @@ remote_names=$(printf '%s\n' "${remote_projects[@]}" | cut -d'|' -f1 | sed 's/^/
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    selected=$(echo -e "$remote_names\n$local_dirs" | fzf)
+    fzf_out=$(echo -e "$remote_names\n$local_dirs" | fzf --print-query)
+    fzf_status=$?
+    if [[ $fzf_status -eq 130 ]]; then
+        exit 0
+    fi
+    query=$(printf '%s\n' "$fzf_out" | head -n1)
+    selected=$(printf '%s\n' "$fzf_out" | tail -n +2)
+
+    if [[ -z $selected ]]; then
+        if [[ -z $query ]]; then
+            exit 0
+        fi
+        if [[ ! "$query" =~ ^[^/]+/[^/]+/[^/]+$ ]]; then
+            echo "Cannot create '$query': expected format 'category/sub/name'." >&2
+            exit 1
+        fi
+
+        new_path="$HOME/dev/$query"
+        confirm=$(printf 'no\nyes\n' | fzf --prompt="Create $new_path? > ")
+        if [[ "$confirm" != "yes" ]]; then
+            exit 0
+        fi
+
+        project_type=$(printf 'python\nother\n' | fzf --prompt="Project type? > ")
+        if [[ -z $project_type ]]; then
+            exit 0
+        fi
+
+        mkdir -p "$new_path" || exit 1
+        if [[ "$project_type" == "python" ]]; then
+            (cd "$new_path" && uv init && uv sync) || exit 1
+        fi
+
+        selected="$new_path"
+    fi
 fi
 
 if [[ -z $selected ]]; then
