@@ -7,6 +7,7 @@ sudo apt install dunst
 sudo apt install polybar
 sudo apt install picom
 sudo apt install rofi
+sudo apt install alacritty
 sudo apt install feh
 sudo apt install ripgrep
 sudo apt install npm

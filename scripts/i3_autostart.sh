@@ -4,7 +4,7 @@
 # startup latency don't matter here — fire everything in parallel.
 
 # Apply machine-specific display mode synchronously *before* launching apps.
-# Otherwise alacritty races xrandr and computes font dimensions against the
+# Otherwise kitty races xrandr and computes font dimensions against the
 # pre-xrandr resolution, producing tiny fonts on 4K until you open a new term.
 machine=$(tr -d '[:space:]' < "$HOME/.dotfiles/.machine" 2>/dev/null || true)
 case "$machine" in
@@ -31,6 +31,7 @@ try_launch flatpak run app.zen_browser.zen \
 try_launch obsidian || echo "i3_autostart: obsidian not found" >&2
 
 # Tag this terminal with a distinct instance name so the assign rule sends
-# only this specific window to workspace 1 (other alacritty windows are
-# unaffected and open wherever they're launched from).
-alacritty --class Alacritty,tmux-sessionizer -e "$HOME/.dotfiles/scripts/tmux_sessionizer.sh" &
+# only this specific window to workspace 1 (other kitty windows are
+# unaffected and open wherever they're launched from). kitty sets the WM_CLASS
+# instance via --name; the assign rule matches on instance="tmux-sessionizer".
+kitty --name tmux-sessionizer "$HOME/.dotfiles/scripts/tmux_sessionizer.sh" &

@@ -9,7 +9,7 @@ Personal dotfiles for a Linux + i3 + tmux + Neovim workstation. The repo is mean
 ## Setup commands
 
 - `./install.sh` — apt-installs system packages (i3, tmux, polybar, picom, rofi, dunst, ripgrep, lazygit, npm), downloads the Neovim AppImage to `/usr/local/bin/nvim`, and installs `black`, `uv`, `ast-grep-cli` via pipx. Run once on a fresh machine.
-- `./setup.sh` — backs up any existing configs to `$XDG_CONFIG_HOME/old_config/` and creates symlinks from this repo into `$XDG_CONFIG_HOME` (`alacritty/`, `nvim/`, `dunst/`, `i3/`, `picom/`, `polybar/`, `rofi/`) and `$HOME` (`.bash_profile`, `.bashrc`, `.tmux.conf`). **Must be run from the repo root** — it uses `$PWD` to compute symlink targets.
+- `./setup.sh` — backs up any existing configs to `$XDG_CONFIG_HOME/old_config/` and creates symlinks from this repo into `$XDG_CONFIG_HOME` (`kitty/`, `alacritty/`, `nvim/`, `dunst/`, `i3/`, `picom/`, `polybar/`, `rofi/`) and `$HOME` (`.bash_profile`, `.bashrc`, `.tmux.conf`). **Must be run from the repo root** — it uses `$PWD` to compute symlink targets.
 
 Note: `.bash_profile` overrides `XDG_CONFIG_HOME` to `$HOME/.dotfiles` itself, so on this machine "config dir" effectively means this repo.
 
