@@ -17,5 +17,9 @@ return {
     },
     max_width_window_percentage = 100,
     max_height_window_percentage = 90,
+    -- Hide images when a window (e.g. the nvim-cmp completion popup) overlaps
+    -- them, so the graphics don't paint over the menu.
+    window_overlap_clear_enabled = true,
+    window_overlap_clear_ft_ignore = { 'cmp_menu', 'cmp_docs', '' },
   },
 }

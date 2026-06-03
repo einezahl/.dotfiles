@@ -35,6 +35,7 @@ require('lazy').setup({
   -- require 'plugins.custom.molten-nvim',
   -- require 'plugins.custom.lazygit',
   require 'plugins.custom.neo-tree',
+  require 'plugins.custom.image',
   -- require 'plugins.custom.toggleterm',
 
   -- Kickstart standard plugins
@@ -66,30 +67,6 @@ require('lazy').setup({
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
-  -- {
-  --   '3rd/image.nvim',
-  --   build = false, -- so that it doesn't build the rock https://github.com/3rd/image.nvim/issues/91#issuecomment-2453430239
-  --   -- config = function()
-  --   --   -- Fix tmux passthrough detection
-  --   --   require('image.utils').tmux.has_passthrough = true
-  --   --
-  --   -- --   require('image').setup {
-  --   -- --     processor = 'magick_cli',
-  --   -- --     window_overlap_clear_enabled = true,
-  --   -- --     window_overlap_clear_ft_ignore = { 'cmp_menu', 'cmp_docs', '' },
-  --   -- --   }
-  --   -- end,
-  --   opts = {
-  --     processor = 'magick_cli',
-  --     max_width = 100,
-  --     max_height = 12,
-  --     max_height_window_percentage = math.huge,
-  --     max_width_window_percentage = math.huge,
-  --     window_overlap_clear_enabled = true, -- toggles images when windows are overlapped
-  --     window_overlap_clear_ft_ignore = { 'cmp_menu', 'cmp_docs', '' },
-  --   },
-  -- },
-  -- Lua
   {
     'folke/zen-mode.nvim',
     opts = {
