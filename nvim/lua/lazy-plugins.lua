@@ -31,7 +31,7 @@ require('lazy').setup({
   -- require 'plugins.custom.feline',
   require 'plugins.custom.friendly-snipptes',
   require 'plugins.custom.luasnip',
-  -- require 'plugins.custom.obsidian',
+  require 'plugins.custom.obsidian',
   -- require 'plugins.custom.molten-nvim',
   -- require 'plugins.custom.lazygit',
   require 'plugins.custom.neo-tree',

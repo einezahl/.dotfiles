@@ -1,31 +1,32 @@
 return {
-  'epwalsh/obsidian.nvim',
+  'obsidian-nvim/obsidian.nvim', -- maintained community fork (epwalsh's repo is archived)
   version = '*', -- recommended, use latest release instead of latest commit
   lazy = true,
   ft = 'markdown',
-  -- Replace the above line with this if you only want to load obsidian.nvim for markdown files in your vault:
-  -- event = {
-  --   -- If you want to use the home shortcut '~' here you need to call 'vim.fn.expand'.
-  --   -- E.g. "BufReadPre " .. vim.fn.expand "~" .. "/my-vault/*.md"
-  --   -- refer to `:h file-pattern` for more examples
-  --   "BufReadPre path/to/my-vault/*.md",
-  --   "BufNewFile path/to/my-vault/*.md",
-  -- },
   dependencies = {
-    -- Required.
     'nvim-lua/plenary.nvim',
-    -- see below for full list of optional dependencies 👇
   },
   opts = {
+    -- Use only the new ':Obsidian <sub>' commands. The default still registers
+    -- the deprecated ':ObsidianXxx' aliases and prints a warning.
+    legacy_commands = false,
+
+    -- Name new notes after their title (e.g. 'random-init-vs-paper-weights.md')
+    -- instead of the default Zettelkasten '<timestamp>-<random>' id. title_id
+    -- slugifies the title, de-duplicates with '-2'/'-3', and only falls back to
+    -- a zettel id when the title is empty. For Obsidian-app-style spaced names
+    -- ('random init vs paper weights.md') return the title verbatim instead.
+    -- Require lazily: obsidian.nvim loads on the markdown filetype, after this
+    -- spec is evaluated, so the module isn't on the runtimepath at startup.
+    note_id_func = function(title, path)
+      return require('obsidian.builtin').title_id(title, path)
+    end,
+
     workspaces = {
       {
-        name = 'personal',
-        path = '/home/admd/Documents/Obsidian/phd',
+        name = 'phd',
+        path = '~/Documents/phd',
       },
-      -- {
-      --   name = 'work',
-      --   path = '~/obsidian/whoishydra',
-      -- },
       {
         name = 'no-vault',
         path = function()
@@ -41,10 +42,6 @@ return {
       },
     },
 
-    -- notes_subdir = 'notes',
-
-    -- Optional, set the log level for obsidian.nvim. This is an integer corresponding to one of the log
-    -- levels defined by "vim.log.levels.*".
     log_level = vim.log.levels.INFO,
 
     daily_notes = {
@@ -54,128 +51,49 @@ return {
       date_format = '%Y-%m/%Y-%m-%d',
       -- Optional, default tags to add to each new daily note created.
       default_tags = { 'daily-notes' },
-      -- Optional, if you want to automatically insert a template from your template directory like 'daily.md'
-      templates = {
-        folder = 'templates',
-      },
+    },
+
+    -- Location of templates, e.g. for ':Obsidian template' and daily notes.
+    templates = {
+      folder = 'templates',
     },
 
     -- Optional, completion of wiki links, local markdown links, and tags using nvim-cmp.
     completion = {
-      -- Set to false to disable completion.
       nvim_cmp = true,
-      -- Trigger completion at 2 chars.
       min_chars = 2,
     },
 
-    -- Optional, configure key mappings. These are the defaults. If you don't want to set any keymappings this
-    -- way then set 'mappings = {}'.
-    mappings = {
-      -- Overrides the 'gf' mapping to work on markdown/wiki links within your vault.
-      ['gf'] = {
-        action = function()
-          return require('obsidian').util.gf_passthrough()
-        end,
-        opts = { noremap = false, expr = true, buffer = true },
-      },
-      ['<leader>og'] = {
-        action = '<cmd>ObsidianSearch<CR>',
-        opts = { buffer = true, desc = '[G]rep in Notes' },
-      },
-      ['<leader>oo'] = {
-        action = '<cmd>ObsidianQuickSwitch<CR>',
-        opts = { buffer = true, desc = '[O]pen QuickSwitch' },
-      },
-      ['<leader>ot'] = {
-        action = '<cmd>ObsidianTOC<CR>',
-        opts = { buffer = true, desc = '[T]oc' },
-      },
-      ['<leader>od'] = {
-        action = '<cmd>ObsidianDailies<CR>',
-        opts = { buffer = true, desc = '[D]ailies' },
-      },
-      ['<leader>or'] = {
-        action = '<cmd>ObsidianRename<CR>',
-        opts = { buffer = true, desc = '[R]ename Note' },
-      },
-      ['<leader>of'] = {
-        action = '<cmd>ObsidianTag<CR>',
-        opts = { buffer = true, desc = '[F]ind by Tag' },
-      },
-      ['<leader>ow'] = {
-        action = '<cmd>ObsidianWorkspace<CR>',
-        opts = { buffer = true, desc = 'Select [W]orkspace' },
-      },
-      ['<leader>on'] = {
-        action = '<cmd>ObsidianNew<CR>',
-        opts = { buffer = true, desc = '[N]ew Note' },
-      },
-      -- Toggle check-boxes.
-      ['<leader><leader>'] = {
-        action = function()
-          return require('obsidian').util.toggle_checkbox()
-        end,
-        opts = { buffer = true },
-      },
-      ['<leader>oz'] = {
-        action = '<cmd>ZenMode<CR>',
-        opts = { buffer = true, desc = '[Z]en Mode' },
-      },
-      -- Smart action depending on context, either follow link or toggle checkbox.
-      ['<cr>'] = {
-        action = function()
-          return require('obsidian').util.smart_action()
-        end,
-        opts = { buffer = true, expr = true },
-      },
-    },
-    ui = {
-      enable = true, -- set to false to disable all additional syntax features
-      update_debounce = 200, -- update delay after a text change (in milliseconds)
-      max_file_length = 5000, -- disable UI features for files with more than this many lines
-      -- Define how various check-boxes are displayed
-      checkboxes = {
-        -- NOTE: the 'char' value has to be a single character, and the highlight groups are defined below.
-        [' '] = { char = '󰄱', hl_group = 'ObsidianTodo' },
-        ['x'] = { char = '', hl_group = 'ObsidianDone' },
-        ['>'] = { char = '', hl_group = 'ObsidianRightArrow' },
-        ['~'] = { char = '󰰱', hl_group = 'ObsidianTilde' },
-        ['!'] = { char = '', hl_group = 'ObsidianImportant' },
-        -- Replace the above with this if you don't have a patched font:
-        -- [" "] = { char = "☐", hl_group = "ObsidianTodo" },
-        -- ["x"] = { char = "✔", hl_group = "ObsidianDone" },
-
-        -- You can also add more custom ones...
-      },
-      -- Use bullet marks for non-checkbox lists.
-      bullets = { char = '•', hl_group = 'ObsidianBullet' },
-      external_link_icon = { char = '', hl_group = 'ObsidianExtLinkIcon' },
-      -- Replace the above with this if you don't have a patched font:
-      -- external_link_icon = { char = "", hl_group = "ObsidianExtLinkIcon" },
-      reference_text = { hl_group = 'ObsidianRefText' },
-      highlight_text = { hl_group = 'ObsidianHighlightText' },
-      tags = { hl_group = 'ObsidianTag' },
-      block_ids = { hl_group = 'ObsidianBlockID' },
-      hl_groups = {
-        -- The options are passed directly to `vim.api.nvim_set_hl()`. See `:help nvim_set_hl`.
-        ObsidianTodo = { bold = true, fg = '#f78c6c' },
-        ObsidianDone = { bold = true, fg = '#89ddff' },
-        ObsidianRightArrow = { bold = true, fg = '#f78c6c' },
-        ObsidianTilde = { bold = true, fg = '#ff5370' },
-        ObsidianImportant = { bold = true, fg = '#d73128' },
-        ObsidianBullet = { bold = true, fg = '#89ddff' },
-        ObsidianRefText = { underline = true, fg = '#c792ea' },
-        ObsidianExtLinkIcon = { fg = '#c792ea' },
-        ObsidianTag = { italic = true, fg = '#89ddff' },
-        ObsidianBlockID = { italic = true, fg = '#89ddff' },
-        ObsidianHighlightText = { bg = '#75662e' },
-      },
-    },
+    -- render-markdown.nvim is active and the fork auto-detects it and backs off
+    -- its own rendering (see obsidian/workspace.lua). Disable explicitly anyway.
+    ui = { enable = false },
   },
   config = function(_, opts)
-    local obsidian = require 'obsidian'
+    require('obsidian').setup(opts)
 
-    obsidian.setup(opts)
-    vim.keymap.set('i', '<C-m>', obsidian.util.toggle_checkbox, { desc = 'Toggle Checkbox' })
+    -- The fork dropped the 'mappings' option; keymaps are set the normal way.
+    -- It already maps <CR> (smart action: follow link / toggle checkbox / fold),
+    -- ]o and [o (link navigation), and 'gf' on vault notes. Add our note-local
+    -- leader maps on the same note-enter event so they only apply in the vault.
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'ObsidianNoteEnter',
+      callback = function(ev)
+        local function map(lhs, rhs, desc)
+          vim.keymap.set('n', lhs, rhs, { buffer = ev.buf, desc = desc })
+        end
+        map('<leader>og', '<cmd>Obsidian search<CR>', '[G]rep in Notes')
+        map('<leader>oo', '<cmd>Obsidian quick_switch<CR>', '[O]pen QuickSwitch')
+        map('<leader>ot', '<cmd>Obsidian toc<CR>', '[T]OC')
+        map('<leader>od', '<cmd>Obsidian dailies<CR>', '[D]ailies')
+        map('<leader>or', '<cmd>Obsidian rename<CR>', '[R]ename Note')
+        map('<leader>of', '<cmd>Obsidian tags<CR>', '[F]ind by Tag')
+        map('<leader>ow', '<cmd>Obsidian workspace<CR>', 'Select [W]orkspace')
+        map('<leader>on', '<cmd>Obsidian new<CR>', '[N]ew Note')
+        map('<leader>oi', '<cmd>Obsidian template<CR>', '[I]nsert Template')
+        map('<leader>oN', '<cmd>Obsidian new_from_template<CR>', '[N]ew from Template')
+        map('<leader>oz', '<cmd>ZenMode<CR>', '[Z]en Mode')
+        map('<leader><leader>', '<cmd>Obsidian toggle_checkbox<CR>', 'Toggle Checkbox')
+      end,
+    })
   end,
 }
