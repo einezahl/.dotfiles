@@ -45,6 +45,19 @@ if needs_install neovim "$nvim_current" "$nvim_latest"; then
     sudo mv nvim-linux-x86_64.appimage /usr/local/bin/nvim
 fi
 
+# tree-sitter CLI: required by nvim-treesitter's 'main' branch, which compiles
+# every parser with `tree-sitter build`. Must be the package-manager/standalone
+# binary, NOT the npm package. Installed to ~/.local/bin (no sudo).
+ts_latest=$(curl -s https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest \
+    | grep -oE '"tag_name": *"v?[^"]+"' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+ts_current=$(tree-sitter --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+if needs_install tree-sitter "$ts_current" "$ts_latest"; then
+    mkdir -p "$HOME/.local/bin"
+    curl -L "https://github.com/tree-sitter/tree-sitter/releases/download/v${ts_latest}/tree-sitter-linux-x64.gz" \
+        | gunzip > "$HOME/.local/bin/tree-sitter"
+    chmod +x "$HOME/.local/bin/tree-sitter"
+fi
+
 sudo apt install pipx
 pipx install black
 pipx install uv
