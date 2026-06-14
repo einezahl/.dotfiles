@@ -11,8 +11,35 @@ return {
   },
   cmd = 'Neotree',
   keys = {
-    { '\\', ':Neotree reveal toggle<CR>', { desc = 'NeoTree toggle (reveal current file)' } },
+    {
+      '\\',
+      function()
+        -- `reveal` mangles non-file buffers such as oil:// URLs into bogus
+        -- paths, so only reveal when the current buffer is an on-disk file.
+        local name = vim.api.nvim_buf_get_name(0)
+        if vim.bo.buftype == '' and name ~= '' and vim.fn.filereadable(name) == 1 then
+          vim.cmd 'Neotree reveal toggle'
+        else
+          vim.cmd 'Neotree toggle'
+        end
+      end,
+      desc = 'NeoTree toggle (reveal current file)',
+    },
   },
+  init = function()
+    -- Open the file-tree sidebar automatically on startup.
+    vim.api.nvim_create_autocmd('VimEnter', {
+      desc = 'Open the Neo-tree sidebar on startup',
+      callback = function()
+        -- Don't take over when Neovim is launched as a git commit/rebase editor.
+        local skip = { gitcommit = true, gitrebase = true }
+        if skip[vim.bo.filetype] then
+          return
+        end
+        vim.cmd 'Neotree show'
+      end,
+    })
+  end,
   opts = {
     event_handlers = {
       {
