@@ -62,14 +62,27 @@ fi
 # tree-sitter CLI: required by nvim-treesitter's 'main' branch, which compiles
 # every parser with `tree-sitter build`. Must be the package-manager/standalone
 # binary, NOT the npm package. Installed to ~/.local/bin (no sudo).
+#
+# The prebuilt binaries link against the glibc of their CI runner. Releases
+# built on Ubuntu 24.04 need glibc 2.39, which Ubuntu 22.04 (glibc 2.35) lacks,
+# so the binary fails with "GLIBC_2.39 not found". After installing the latest,
+# verify it actually runs and fall back to the newest known glibc-2.34 build.
+ts_fallback=0.25.10
 ts_latest=$(curl -s https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest \
     | grep -oE '"tag_name": *"v?[^"]+"' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
 ts_current=$(tree-sitter --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-if needs_install tree-sitter "$ts_current" "$ts_latest"; then
-    mkdir -p "$HOME/.local/bin"
-    curl -L "https://github.com/tree-sitter/tree-sitter/releases/download/v${ts_latest}/tree-sitter-linux-x64.gz" \
+install_tree_sitter() {
+    curl -L "https://github.com/tree-sitter/tree-sitter/releases/download/v${1}/tree-sitter-linux-x64.gz" \
         | gunzip > "$HOME/.local/bin/tree-sitter"
     chmod +x "$HOME/.local/bin/tree-sitter"
+}
+if needs_install tree-sitter "$ts_current" "$ts_latest"; then
+    mkdir -p "$HOME/.local/bin"
+    install_tree_sitter "$ts_latest"
+    if ! "$HOME/.local/bin/tree-sitter" --version >/dev/null 2>&1; then
+        echo "tree-sitter $ts_latest won't run (glibc too old); falling back to $ts_fallback"
+        install_tree_sitter "$ts_fallback"
+    fi
 fi
 
 sudo apt install pipx
