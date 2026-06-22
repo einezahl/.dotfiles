@@ -72,4 +72,5 @@ esac
 ln -sf "$PWD/i3/machine/${machine}.conf" "$PWD/i3/machine/current.conf"
 ln -sf "$PWD/rofi/machine-${machine}.rasi" "$PWD/rofi/machine.rasi"
 ln -sf "$PWD/polybar/cuts/sizes-${machine}.ini" "$PWD/polybar/cuts/machine.ini"
+ln -sf "$PWD/kitty/font-${machine}.conf" "$PWD/kitty/machine.conf"
 
