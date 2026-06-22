@@ -1,6 +1,5 @@
 sudo apt update
 sudo apt install i3
-sudo apt install tmux -y
 sudo apt install zsh -y
 
 sudo apt install dunst
@@ -43,6 +42,21 @@ if needs_install neovim "$nvim_current" "$nvim_latest"; then
     curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage
     chmod u+x nvim-linux-x86_64.appimage
     sudo mv nvim-linux-x86_64.appimage /usr/local/bin/nvim
+fi
+
+# tmux: needs >=3.3 for `allow-passthrough`, which lets kitty's graphics
+# protocol survive tmux (used by image.nvim). Apt ships 3.2a, so build the
+# latest release from the official source tarball (tmux ships no prebuilt
+# binary). Installs to /usr/local/bin, shadowing apt's tmux.
+tmux_latest=$(curl -s https://api.github.com/repos/tmux/tmux/releases/latest \
+    | grep -oE '"tag_name": *"[^"]+"' | grep -oE '[0-9]+\.[0-9]+[a-z]?')
+tmux_current=$(tmux -V 2>/dev/null | grep -oE '[0-9]+\.[0-9]+[a-z]?')
+if needs_install tmux "$tmux_current" "$tmux_latest"; then
+    sudo apt install -y libevent-dev libncurses-dev bison
+    curl -L -o /tmp/tmux.tar.gz "https://github.com/tmux/tmux/releases/download/${tmux_latest}/tmux-${tmux_latest}.tar.gz"
+    tar xf /tmp/tmux.tar.gz -C /tmp
+    (cd "/tmp/tmux-${tmux_latest}" && ./configure && make && sudo make install)
+    rm -rf /tmp/tmux.tar.gz "/tmp/tmux-${tmux_latest}"
 fi
 
 # tree-sitter CLI: required by nvim-treesitter's 'main' branch, which compiles
