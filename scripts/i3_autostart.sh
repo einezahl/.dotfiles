@@ -35,3 +35,29 @@ try_launch obsidian || echo "i3_autostart: obsidian not found" >&2
 # unaffected and open wherever they're launched from). kitty sets the WM_CLASS
 # instance via --name; the assign rule matches on instance="tmux-sessionizer".
 kitty --name tmux-sessionizer "$HOME/.dotfiles/scripts/tmux_sessionizer.sh" &
+
+# True once the shared ssh-agent started by keychain holds at least one key.
+# --query/--nolock only reads the agent info keychain wrote to ~/.keychain,
+# so this never touches keychain's lock while another instance is prompting.
+ssh_keys_loaded() {
+    eval "$(keychain --query --quiet --nolock --agents ssh 2> /dev/null)"
+    export SSH_AUTH_SOCK
+    ssh-add -l > /dev/null 2>&1
+}
+
+# The thesis terminal loads the SSH keys before spawning its tmux windows (see
+# thesis_tmux.sh), exactly like the sessionizer terminal above. Launched in
+# parallel they'd both prompt for the passphrase: keychain's lock only waits
+# 5 s before it is taken by force. So wait until the sessionizer terminal on
+# workspace 1 — the one in view after login — has loaded the keys, and the
+# passphrase is asked for exactly once, there. Give up after 5 min (e.g. the
+# prompt was dismissed) and launch anyway; the thesis terminal then prompts on
+# its own.
+launch_thesis_after_ssh_keys() {
+    for _ in $(seq 600); do
+        ssh_keys_loaded && break
+        sleep 0.5
+    done
+    "$HOME/.dotfiles/scripts/thesis_workspace.sh"
+}
+launch_thesis_after_ssh_keys &

@@ -40,8 +40,9 @@ assign [class="(?i)zotero"]   → number 7
 assign [class="(?i)zen"]      → number 8
 assign [class="(?i)obsidian"] → number 9
 assign [instance="tmux-sessionizer"] → number 1
+assign [instance="thesis-tmux"]      → number 2
 
-# launch desktop apps; the assign rules above route them to the right workspace
+# launch desktop apps (incl. the thesis workspace); the assign rules above route them to the right workspace
 exec --no-startup-id $HOME/.dotfiles/scripts/i3_autostart.sh
 # exec --no-startup-id i3-layouts
 ### Shortcuts ###
