@@ -36,6 +36,9 @@ exec --no-startup-id nm-applet
 # Applied when the window first appears, so launch order / startup speed
 # doesn't matter — the autostart script can fire everything in parallel.
 # To find the right class for an app: run `xprop WM_CLASS` then click it.
+assign [class="(?i)keepassxc"] → number 10
+assign [class="(?i)nextcloud"] → number 10
+assign [class="(?i)cisco"]     → number 10
 assign [class="(?i)zotero"]   → number 7
 assign [class="(?i)zen"]      → number 8
 assign [class="(?i)obsidian"] → number 9

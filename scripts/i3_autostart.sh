@@ -30,6 +30,14 @@ try_launch flatpak run app.zen_browser.zen \
 
 try_launch obsidian || echo "i3_autostart: obsidian not found" >&2
 
+try_launch keepassxc || echo "i3_autostart: keepassxc not found" >&2
+
+# i3 doesn't run ~/.config/autostart entries, so Nextcloud has to be started here.
+try_launch nextcloud || echo "i3_autostart: nextcloud not found" >&2
+
+try_launch /opt/cisco/secureclient/bin/vpnui \
+    || echo "i3_autostart: cisco secure client not found" >&2
+
 # Tag this terminal with a distinct instance name so the assign rule sends
 # only this specific window to workspace 1 (other kitty windows are
 # unaffected and open wherever they're launched from). kitty sets the WM_CLASS
