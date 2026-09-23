@@ -42,6 +42,8 @@ eval "$(zoxide init zsh)"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 export TERM=xterm-256color
+export EDITOR=nvim
+export VISUAL=nvim
 export DOCKER_HOST=unix://$HOME/.docker/desktop/docker.sock
 export CLAUDE_CODE_NO_FLICKER=1
 

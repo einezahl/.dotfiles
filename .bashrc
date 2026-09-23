@@ -33,6 +33,8 @@ source "$HOME/.dotfiles/scripts/ssh_keychain.sh"
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
 export TERM=xterm-256color
+export EDITOR=nvim
+export VISUAL=nvim
 export DOCKER_HOST=unix://$HOME/.docker/desktop/docker.sock
 
 # yazi: `y` launches the file manager and cd's the shell into whatever
