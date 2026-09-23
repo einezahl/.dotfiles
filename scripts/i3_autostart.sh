@@ -8,7 +8,7 @@
 # pre-xrandr resolution, producing tiny fonts on 4K until you open a new term.
 machine=$(tr -d '[:space:]' < "$HOME/.dotfiles/.machine" 2>/dev/null || true)
 case "$machine" in
-    4k) xrandr --output DP-0 --mode 3840x2160 --rate 143.99 ;;
+    4k) xrandr --output DP-0 --mode 3840x2160 --rate 120 ;;  # this panel tops out at 120 Hz; 143.99 was silently rejected
 esac
 
 # Run "$@" in the background if its first word names an available program.
