@@ -6,9 +6,27 @@
 # Apply machine-specific display mode synchronously *before* launching apps.
 # Otherwise kitty races xrandr and computes font dimensions against the
 # pre-xrandr resolution, producing tiny fonts on 4K until you open a new term.
+#
+# The Samsung's DisplayPort link can come up a second *after* X starts. X then
+# runs on a 640x480 dummy screen, the xrandr call below finds no DP-0 to set,
+# and every app opens into a tiny window in the top-left corner. So wait (up
+# to 5 s; normally it is there at once) until the monitor is reported connected.
+wait_for_output() {
+    for _ in $(seq 10); do
+        xrandr --query | grep -q "^$1 connected" && return 0
+        sleep 0.5
+    done
+    echo "i3_autostart: $1 still not connected, setting mode anyway" >&2
+}
+
 machine=$(tr -d '[:space:]' < "$HOME/.dotfiles/.machine" 2>/dev/null || true)
 case "$machine" in
-    4k) xrandr --output DP-0 --mode 3840x2160 --rate 120 ;;  # this panel tops out at 120 Hz; 143.99 was silently rejected
+    4k)
+        wait_for_output DP-0
+        xrandr --output DP-0 --mode 3840x2160 --rate 143.99 --primary  # this panel tops out at 120 Hz; 143.99 was silently rejected
+        # i3/config's feh may have scaled the wallpaper to the dummy screen.
+        feh --bg-scale "$HOME/.dotfiles/wallpapers/forrest.jpeg"
+        ;;
 esac
 
 # Run "$@" in the background if its first word names an available program.
