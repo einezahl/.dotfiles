@@ -23,7 +23,7 @@ machine=$(tr -d '[:space:]' < "$HOME/.dotfiles/.machine" 2>/dev/null || true)
 case "$machine" in
     4k)
         wait_for_output DP-0
-        xrandr --output DP-0 --mode 3840x2160 --rate 143.99 --primary  # this panel tops out at 120 Hz; 143.99 was silently rejected
+        xrandr --output DP-0 --mode 3840x2160 --rate 143.99 --primary
         # i3/config's feh may have scaled the wallpaper to the dummy screen.
         feh --bg-scale "$HOME/.dotfiles/wallpapers/forrest.jpeg"
         ;;
