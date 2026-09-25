@@ -27,24 +27,14 @@ alias ssh="TERM=xterm-256color ssh"
 
 eval "$(zoxide init bash)"
 
-# SSH keys via keychain — starts one ssh-agent and reuses it across shells,
-# prompting for passphrases only on the first shell after boot. Every private
-# key in ~/.ssh is detected by its "PRIVATE KEY" header, so this works no
-# matter how the keys are named on a given machine.
-ssh_keys=()
-for key in "$HOME"/.ssh/*; do
-  [ -f "$key" ] || continue
-  IFS= read -r header < "$key" || continue
-  case "$header" in
-    *"PRIVATE KEY"*) ssh_keys+=("$key") ;;
-  esac
-done
-eval "$(keychain --eval --quiet --agents ssh "${ssh_keys[@]}")"
-unset ssh_keys key header
+# SSH keys via keychain. See scripts/ssh_keychain.sh for the details.
+source "$HOME/.dotfiles/scripts/ssh_keychain.sh"
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
 export TERM=xterm-256color
+export EDITOR=nvim
+export VISUAL=nvim
 export DOCKER_HOST=unix://$HOME/.docker/desktop/docker.sock
 
 # yazi: `y` launches the file manager and cd's the shell into whatever

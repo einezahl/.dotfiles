@@ -1,0 +1,2 @@
+# Copy selections to the CLIPBOARD (Ctrl+V) instead of the default PRIMARY (middle-click).
+set selection-clipboard clipboard

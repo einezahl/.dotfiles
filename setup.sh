@@ -20,6 +20,7 @@ mkdir -p "$OLD_CONFIG"
 [ -L "$XDG_CONFIG_HOME"/picom ] && unlink "$XDG_CONFIG_HOME"/picom
 [ -L "$XDG_CONFIG_HOME"/polybar ] && unlink "$XDG_CONFIG_HOME"/polybar
 [ -L "$XDG_CONFIG_HOME"/rofi ] && unlink "$XDG_CONFIG_HOME"/rofi
+[ -L "$XDG_CONFIG_HOME"/zathura ] && unlink "$XDG_CONFIG_HOME"/zathura
 [ -L "$HOME"/.claude/CLAUDE.md ] && unlink "$HOME"/.claude/CLAUDE.md
 [ -L "$HOME"/.claude/ml-projects.md ] && unlink "$HOME"/.claude/ml-projects.md
 
@@ -36,6 +37,7 @@ mkdir -p "$OLD_CONFIG"
 [ -d "$XDG_CONFIG_HOME"/picom ] && mv "$XDG_CONFIG_HOME"/picom "$OLD_CONFIG"/picom
 [ -d "$XDG_CONFIG_HOME"/polybar ] && mv "$XDG_CONFIG_HOME"/polybar "$OLD_CONFIG"/polybar
 [ -d "$XDG_CONFIG_HOME"/rofi ] && mv "$XDG_CONFIG_HOME"/rofi "$OLD_CONFIG"/rofi
+[ -d "$XDG_CONFIG_HOME"/zathura ] && mv "$XDG_CONFIG_HOME"/zathura "$OLD_CONFIG"/zathura
 [ -f "$HOME"/.claude/CLAUDE.md ] && mv "$HOME"/.claude/CLAUDE.md "$OLD_CONFIG"/CLAUDE.md
 [ -f "$HOME"/.claude/ml-projects.md ] && mv "$HOME"/.claude/ml-projects.md "$OLD_CONFIG"/ml-projects.md
 
@@ -52,6 +54,7 @@ ln -sf "$PWD/i3" "$XDG_CONFIG_HOME"/i3
 ln -sf "$PWD/picom" "$XDG_CONFIG_HOME"/picom
 ln -sf "$PWD/polybar" "$XDG_CONFIG_HOME"/polybar
 ln -sf "$PWD/rofi" "$XDG_CONFIG_HOME"/rofi
+ln -sf "$PWD/zathura" "$XDG_CONFIG_HOME"/zathura
 ln -sf "$PWD/CLAUDE.md" "$HOME"/.claude/CLAUDE.md
 ln -sf "$PWD/ml-projects.md" "$HOME"/.claude/ml-projects.md
 

@@ -27,16 +27,35 @@ return {
     },
   },
   init = function()
-    -- Open the file-tree sidebar automatically on startup.
+    -- `nvim <dir>` and plain `nvim`: focused Neo-tree sidebar next to an empty
+    -- window. `nvim <file>`: just the file, no sidebar.
     vim.api.nvim_create_autocmd('VimEnter', {
-      desc = 'Open the Neo-tree sidebar on startup',
+      desc = 'Open a focused Neo-tree sidebar when Neovim starts on a directory',
       callback = function()
-        -- Don't take over when Neovim is launched as a git commit/rebase editor.
-        local skip = { gitcommit = true, gitrebase = true }
-        if skip[vim.bo.filetype] then
+        local dir = nil
+        if vim.fn.argc() == 1 then
+          if vim.bo.filetype == 'oil' then
+            -- oil.nvim has already turned the directory buffer into an oil
+            -- listing and rewritten argv to its oil:// URL.
+            dir = require('oil').get_current_dir()
+          elseif vim.fn.isdirectory(vim.fn.argv(0)) == 1 then
+            dir = vim.fn.fnamemodify(vim.fn.argv(0), ':p')
+          end
+        end
+        -- line2byte('$') == -1 means the buffer is empty, so text piped in via `nvim -` still counts as a file.
+        local opened_nothing = vim.fn.argc() == 0 and vim.fn.line2byte '$' == -1
+        if not (dir or opened_nothing) then
           return
         end
-        vim.cmd 'Neotree show'
+
+        if dir then
+          -- Swap the directory listing for an empty buffer so the right side stays blank.
+          local dir_buf = vim.api.nvim_get_current_buf()
+          vim.cmd.cd(vim.fn.fnameescape(dir))
+          vim.cmd.enew()
+          pcall(vim.api.nvim_buf_delete, dir_buf, { force = true })
+        end
+        vim.cmd 'Neotree focus'
       end,
     })
   end,

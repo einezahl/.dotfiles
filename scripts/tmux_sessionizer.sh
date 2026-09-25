@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Load SSH keys before spawning any tmux window. This blocks for the passphrase
+# once, here in the launching terminal, so the per-window shells find the keys
+# already loaded and don't each prompt (which would swallow the send-keys
+# command that opens nvim/lazygit/claude). See scripts/ssh_keychain.sh.
+source "$HOME/.dotfiles/scripts/ssh_keychain.sh"
+
 remote_projects=(
     "hpcwork-kair|/hpcwork/tr434677/dev/super_resolution/KAIR|hpc"
 )

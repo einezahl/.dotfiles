@@ -1,19 +1,7 @@
-# SSH keys via keychain — starts one ssh-agent and reuses it across shells,
-# prompting for passphrases only on the first shell after boot. Every private
-# key in ~/.ssh is detected by its "PRIVATE KEY" header, so this works no
-# matter how the keys are named on a given machine. Must run before the
-# Powerlevel10k instant prompt below, which swallows the console input
-# keychain needs for passphrase prompts.
-ssh_keys=()
-for key in "$HOME"/.ssh/*(N); do
-  [ -f "$key" ] || continue
-  IFS= read -r header < "$key" || continue
-  case "$header" in
-    *"PRIVATE KEY"*) ssh_keys+=("$key") ;;
-  esac
-done
-eval "$(keychain --eval --quiet --agents ssh "${ssh_keys[@]}")"
-unset ssh_keys key header
+# SSH keys via keychain. Must run before the Powerlevel10k instant prompt
+# below, which swallows the console input keychain needs for passphrase
+# prompts. See scripts/ssh_keychain.sh for the details.
+source "$HOME/.dotfiles/scripts/ssh_keychain.sh"
 
 # Enable Powerlevel10k instant prompt. Must stay near the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
@@ -54,6 +42,8 @@ eval "$(zoxide init zsh)"
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 export TERM=xterm-256color
+export EDITOR=nvim
+export VISUAL=nvim
 export DOCKER_HOST=unix://$HOME/.docker/desktop/docker.sock
 export CLAUDE_CODE_NO_FLICKER=1
 
