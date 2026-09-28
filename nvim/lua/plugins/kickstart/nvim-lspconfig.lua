@@ -142,6 +142,20 @@ return { -- LSP Configuration & Plugins
       end,
     })
 
+    -- Drop pushed diagnostics for buffers that aren't loaded. Neovim 0.12.2's
+    -- vim.diagnostic.set() registers a fresh one-shot BufRead autocmd (holding the
+    -- diagnostics) for every update to an unloaded buffer and never replaces it
+    -- (once_buf_loaded in vim/diagnostic.lua). texlab publishes project-wide, which
+    -- piled up ~80k such autocmds and several GB within an hour in the thesis.
+    local publish_diagnostics = vim.lsp.handlers['textDocument/publishDiagnostics']
+    vim.lsp.handlers['textDocument/publishDiagnostics'] = function(err, result, ctx, config)
+      local bufnr = vim.fn.bufnr(vim.uri_to_fname(result.uri))
+      if bufnr == -1 or not vim.api.nvim_buf_is_loaded(bufnr) then
+        return
+      end
+      return publish_diagnostics(err, result, ctx, config)
+    end
+
     -- LSP servers and clients are able to communicate to each other what features they support.
     --  By default, Neovim doesn't support everything that is in the LSP specification.
     --  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
