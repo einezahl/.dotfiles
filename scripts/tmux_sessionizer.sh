@@ -6,11 +6,33 @@
 # command that opens nvim/lazygit/claude). See scripts/ssh_keychain.sh.
 source "$HOME/.dotfiles/scripts/ssh_keychain.sh"
 
-remote_projects=(
-    "hpcwork-kair|/hpcwork/tr434677/dev/super_resolution/KAIR|hpc"
+# Per-machine project layout lives outside the dotfiles so each machine can
+# describe its own structure. The file is sourced as bash and may override
+# project_roots and remote_projects; the defaults below apply when it is absent.
+config_file="${XDG_CONFIG_HOME:-$HOME/.config}/tmux-sessionizer/config.sh"
+
+# Format: "root|depth". Every directory exactly `depth` levels below `root` is a
+# project; depth 0 makes `root` itself a project. New projects are created under
+# the first root.
+project_roots=(
+    "$HOME/dev|3"
+    "$HOME/.dotfiles|0"
 )
 
-local_dirs=$(find $HOME/dev/ -mindepth 3 -maxdepth 3 -type d; echo "$HOME/.dotfiles")
+# Format: "name|remote_path|ssh_host".
+remote_projects=()
+
+if [[ -f $config_file ]]; then
+    source "$config_file"
+fi
+
+local_dirs=$(
+    for entry in "${project_roots[@]}"; do
+        root="${entry%|*}"
+        depth="${entry##*|}"
+        find "$root" -mindepth "$depth" -maxdepth "$depth" -type d 2>/dev/null
+    done
+)
 remote_names=$(printf '%s\n' "${remote_projects[@]}" | cut -d'|' -f1 | sed 's/^/[remote] /')
 
 if [[ $# -eq 1 ]]; then
@@ -28,12 +50,15 @@ else
         if [[ -z $query ]]; then
             exit 0
         fi
-        if [[ ! "$query" =~ ^[^/]+/[^/]+/[^/]+$ ]]; then
-            echo "Cannot create '$query': expected format 'category/sub/name'." >&2
+        new_root="${project_roots[0]%|*}"
+        new_depth="${project_roots[0]##*|}"
+        IFS=/ read -ra query_parts <<< "$query"
+        if [[ $query == /* || $query == */ || $query == *//* || ${#query_parts[@]} -ne $new_depth ]]; then
+            echo "Cannot create '$query': expected $new_depth path segments below $new_root." >&2
             exit 1
         fi
 
-        new_path="$HOME/dev/$query"
+        new_path="$new_root/$query"
         confirm=$(printf 'no\nyes\n' | fzf --prompt="Create $new_path? > ")
         if [[ "$confirm" != "yes" ]]; then
             exit 0

@@ -37,11 +37,11 @@ To enable/disable a plugin, comment/uncomment its `require` line in `lua/lazy-pl
 
 `scripts/tmux_sessionizer.sh` (bound to `prefix + f` in `.tmux.conf`) is the project switcher:
 
-- Discovers local projects with `find $HOME/dev/ -mindepth 3 -maxdepth 3 -type d` (i.e. expects projects nested at `~/dev/<group>/<category>/<project>`).
-- Has a hard-coded `remote_projects` array for HPC entries (currently one: `hpcwork-kair`). Format: `name|remote_path|ssh_host`. The script auto-mounts the remote path via `sshfs` to `$HOME/cluster/<name>`.
+- Reads the per-machine project layout from `~/.config/tmux-sessionizer/config.sh` (outside the repo, not tracked). That file is sourced as bash and sets `project_roots` (`root|depth` entries; depth 0 means the root itself is a project; new projects are created under the first root) and `remote_projects` (`name|remote_path|ssh_host`). Without the file, the defaults are `~/dev` at depth 3 plus `~/.dotfiles`, and no remote projects.
+- Remote projects are auto-mounted via `sshfs` to `$HOME/cluster/<name>`.
 - Creates a 3-window tmux session per project: `exec`, `edit` (opens nvim), `git` (opens lazygit). All windows source `.venv/bin/activate` and prepend the project to `PYTHONPATH`.
 
-To add a new HPC project, append a `name|path|ssh_host` line to the `remote_projects` array in this script.
+To add a project root or HPC project on a machine, edit that machine's `~/.config/tmux-sessionizer/config.sh`.
 
 ### i3 + polybar + rofi
 
