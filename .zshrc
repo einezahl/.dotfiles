@@ -60,6 +60,14 @@ export PATH="$HOME/.opencode/bin:$PATH"
 [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && \
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
 
+# Node via fnm — the apt Node is too old for npm-based tools like Mason's
+# language servers. After Homebrew so fnm's Node wins. Guarded for machines
+# without fnm.
+if [ -x "$HOME/.local/share/fnm/fnm" ]; then
+  export PATH="$HOME/.local/share/fnm:$PATH"
+  eval "$(fnm env --use-on-cd --shell zsh)"
+fi
+
 # Powerlevel10k theme (cloned into ~/.dotfiles/zsh/ by install.sh — gitignored,
 # so a fresh machine that skipped install.sh won't have it). Warn loudly rather
 # than failing silently to a bare prompt.
