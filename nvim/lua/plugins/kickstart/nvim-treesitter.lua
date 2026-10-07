@@ -17,12 +17,16 @@ return { -- Highlight, edit, and navigate code
       'c_sharp',
       'diff',
       'html',
+      'json',
       'lua',
       'luadoc',
       'markdown',
       'markdown_inline',
+      'python',
+      'toml',
       'vim',
       'vimdoc',
+      'yaml',
     }
 
     -- 'main' ships no highlight/indent modules. Start treesitter highlighting
