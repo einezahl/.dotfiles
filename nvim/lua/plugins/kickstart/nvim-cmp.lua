@@ -117,7 +117,10 @@ return { -- Autocompletion
         -- Manually trigger a completion from nvim-cmp.
         --  Generally you don't need this, because nvim-cmp will display
         --  completions whenever it has completion options available.
-        ['<C-Space>'] = cmp.mapping.complete {},
+        -- LSP results are kept out of the automatic menu and only shown on demand here.
+        ['<C-Space>'] = cmp.mapping.complete {
+          config = { sources = { { name = 'nvim_lsp' } } },
+        },
 
         -- Think of <c-l> as moving to the right of your snippet expansion.
         --  So if you have a snippet that's like:
@@ -142,10 +145,9 @@ return { -- Autocompletion
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
       },
       sources = {
-        { name = 'path' },
-        { name = 'nvim_lsp', keyword_length = 1 },
-        { name = 'buffer', keyword_length = 3 },
         { name = 'luasnip', keyword_length = 2 },
+        { name = 'path' },
+        { name = 'buffer', keyword_length = 3 },
       },
     }
   end,

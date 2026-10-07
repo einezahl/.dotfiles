@@ -169,6 +169,7 @@ return { -- LSP Configuration & Plugins
           basedpyright = {
             analysis = {
               autoSearchPaths = true,
+              autoImportCompletions = false,
               diagnosticMode = 'openFilesOnly',
               useLibraryCodeForTypes = true,
               typeCheckingMode = 'basic',
