@@ -177,6 +177,19 @@ return { -- LSP Configuration & Plugins
           },
         },
       },
+      matlab_ls = {
+        -- The default only starts inside a git repo; this also covers loose .m files.
+        single_file_support = true,
+        settings = {
+          MATLAB = {
+            -- MATLAB root derived from the `matlab` on PATH (…/R20xx/bin/matlab → …/R20xx),
+            -- since the installed release differs per machine.
+            installPath = vim.fn.fnamemodify(vim.fn.resolve(vim.fn.exepath 'matlab'), ':h:h'),
+            indexWorkspace = true,
+            telemetry = false,
+          },
+        },
+      },
       -- pylsp = {
       --   settings = {
       --     pylsp = {
