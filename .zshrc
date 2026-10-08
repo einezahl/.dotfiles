@@ -69,8 +69,8 @@ export PATH="$PATH:/usr/local/go/bin:$HOME/go/bin"
 # opencode CLI
 export PATH="$HOME/.opencode/bin:$PATH"
 
-# MATLAB — only installed on some machines.
-[ -d "$HOME/tools/matlab_2026a/bin" ] && export PATH="$PATH:$HOME/tools/matlab_2026a/bin"
+# MTEX installation
+export MTEX_PATH="$HOME/tools/mtex-7.1.0/"
 
 # Homebrew/Linuxbrew — guarded so machines without it don't error every shell.
 [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && \
