@@ -24,6 +24,15 @@ autoload -Uz compinit && compinit
 # vi-style command-line editing
 bindkey -v
 
+# Ctrl-F runs the tmux sessionizer (the same script as tmux's prefix + f).
+tmux-sessionizer-widget() {
+  BUFFER="$HOME/.dotfiles/scripts/tmux_sessionizer.sh"
+  zle accept-line
+}
+zle -N tmux-sessionizer-widget
+bindkey -M viins '^F' tmux-sessionizer-widget
+bindkey -M vicmd '^F' tmux-sessionizer-widget
+
 export NVM_DIR="$HOME/.nvm"
 [ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"
 
