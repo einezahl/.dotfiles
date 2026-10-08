@@ -4,11 +4,13 @@ OLD_CONFIG="$XDG_CONFIG_HOME"/old_config
 mkdir -p "$XDG_CONFIG_HOME"/bash
 mkdir -p "$XDG_CONFIG_HOME"/kitty
 mkdir -p "$XDG_CONFIG_HOME"/alacritty
+mkdir -p "$XDG_CONFIG_HOME"/yazi
 mkdir -p "$HOME"/.claude
 mkdir -p "$OLD_CONFIG"
 
 [ -L "$XDG_CONFIG_HOME"/kitty/kitty.conf ] && unlink "$XDG_CONFIG_HOME"/kitty/kitty.conf
 [ -L "$XDG_CONFIG_HOME"/alacritty/alacritty.toml ] && unlink "$XDG_CONFIG_HOME"/alacritty/alacritty.toml
+[ -L "$XDG_CONFIG_HOME"/yazi/yazi.toml ] && unlink "$XDG_CONFIG_HOME"/yazi/yazi.toml
 [ -L "$HOME"/.bash_profile ] && unlink "$HOME"/.bash_profile
 [ -L "$HOME"/.bashrc ] && unlink "$HOME"/.bashrc
 [ -L "$HOME"/.zshrc ] && unlink "$HOME"/.zshrc
@@ -26,6 +28,7 @@ mkdir -p "$OLD_CONFIG"
 
 [ -f "$XDG_CONFIG_HOME"/kitty/kitty.conf ] && mv "$XDG_CONFIG_HOME"/kitty/kitty.conf "$OLD_CONFIG"/kitty/kitty.conf
 [ -f "$XDG_CONFIG_HOME"/alacritty/alacritty.toml ] && mv "$XDG_CONFIG_HOME"/alacritty/alacritty.toml "$OLD_CONFIG"/alacritty/alacritty.toml
+[ -f "$XDG_CONFIG_HOME"/yazi/yazi.toml ] && mv "$XDG_CONFIG_HOME"/yazi/yazi.toml "$OLD_CONFIG"/yazi.toml
 [ -f "$HOME"/.bash_profile ] && mv "$HOME"/.bash_profile "$OLD_CONFIG"/.bash_profile
 [ -f "$HOME"/.bashrc ] && mv "$HOME"/.bashrc "$OLD_CONFIG"/.bashrc
 [ -f "$HOME"/.zshrc ] && mv "$HOME"/.zshrc "$OLD_CONFIG"/.zshrc
@@ -43,6 +46,7 @@ mkdir -p "$OLD_CONFIG"
 
 ln -sf "$PWD/kitty/kitty.conf" "$XDG_CONFIG_HOME"/kitty/kitty.conf
 ln -sf "$PWD/alacritty.toml" "$XDG_CONFIG_HOME"/alacritty/alacritty.toml
+ln -sf "$PWD/yazi/yazi.toml" "$XDG_CONFIG_HOME"/yazi/yazi.toml
 ln -sf "$PWD/.bash_profile" "$HOME"/.bash_profile
 ln -sf "$PWD/.bashrc" "$HOME"/.bashrc
 ln -sf "$PWD/.zshrc" "$HOME"/.zshrc
