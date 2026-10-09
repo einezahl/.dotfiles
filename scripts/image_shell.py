@@ -21,7 +21,9 @@ import skimage as ski
 import tifffile
 from IPython import start_ipython
 
-from image_info import is_image, load_image
+# Importing image_info would otherwise write scripts/__pycache__ into the dotfiles repo.
+sys.dont_write_bytecode = True
+from image_info import is_image, load_image  # noqa: E402
 
 
 def main() -> None:
