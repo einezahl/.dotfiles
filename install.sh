@@ -108,6 +108,18 @@ if needs_install bw "$bw_current" "$BW_VER"; then
     rm /tmp/bw.zip
 fi
 
+# fzf: yazi's `z` (zoxide) and `Z` pickers pass options that apt's fzf 0.29
+# rejects (e.g. --scrollbar), so the picker exits instantly. Install the latest
+# static binary to ~/.local/bin (no sudo), which shadows /usr/bin/fzf on PATH.
+fzf_latest=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest \
+    | grep -oE '"tag_name": *"v?[^"]+"' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+fzf_current=$(fzf --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1)
+if needs_install fzf "$fzf_current" "$fzf_latest"; then
+    mkdir -p "$HOME/.local/bin"
+    curl -L "https://github.com/junegunn/fzf/releases/download/v${fzf_latest}/fzf-${fzf_latest}-linux_amd64.tar.gz" \
+        | tar xz -C "$HOME/.local/bin" fzf
+fi
+
 # yazi: terminal file manager. Apt ships a stale version; grab the latest
 # pre-built binary from GitHub releases. Recommended companions (zoxide, fzf,
 # ripgrep, jq) are already installed above.
