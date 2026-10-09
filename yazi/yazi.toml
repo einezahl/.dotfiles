@@ -7,8 +7,12 @@ edit = [
 pdf = [
   { run = 'evince "$@"', desc = "Open in Evince", orphan = true },
 ]
+image = [
+  { run = 'eog "$@"', desc = "Open in Eye of GNOME", orphan = true },
+]
 
 [open]
 prepend_rules = [
   { mime = "application/pdf", use = "pdf" },
+  { mime = "image/*", use = "image" },
 ]
