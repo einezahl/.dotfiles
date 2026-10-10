@@ -65,9 +65,15 @@ link() {
     ln -s "$src" "$dst"
 }
 
+# bash is no longer used; drop links left over from earlier versions of this repo
+for f in "$HOME/.bashrc" "$HOME/.bash_profile"; do
+    if [ -L "$f" ] && [[ "$(readlink "$f")" == "$DOTFILES"/* ]]; then
+        rm "$f"
+        echo "removed stale link $f"
+    fi
+done
+
 # shared by all machines
-link .bashrc                  "$HOME/.bashrc"
-link .bash_profile            "$HOME/.bash_profile"
 link .zshrc                   "$HOME/.zshrc"
 link .zprofile                "$HOME/.zprofile"
 link .tmux.conf               "$HOME/.tmux.conf"

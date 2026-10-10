@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Purpose
 
-Personal dotfiles for three machines: a MacBook (yabai/skhd or AeroSpace) and two Ubuntu machines running i3. One branch (`main`) serves all of them. Shared configs live at the top level, OS-specific shell settings in `shell/`, and everything that differs per machine (display layout, VPN helpers, font size) in `machines/<name>/`. The `setup` script symlinks tracked configs into `$HOME` / `~/.config`, so edits here take effect immediately through those symlinks — there is no build step.
+Personal dotfiles for three machines: a MacBook (yabai/skhd or AeroSpace) and two Ubuntu machines running i3. All of them use zsh with powerlevel10k; bash is not supported. One branch (`main`) serves all of them. Shared configs live at the top level, OS-specific shell settings in `shell/`, and everything that differs per machine (display layout, VPN helpers, font size) in `machines/<name>/`. The `setup` script symlinks tracked configs into `$HOME` / `~/.config`, so edits here take effect immediately through those symlinks — there is no build step.
 
 ## Setup
 
@@ -12,9 +12,9 @@ Personal dotfiles for three machines: a MacBook (yabai/skhd or AeroSpace) and tw
 cd ~/.dotfiles && ./setup <machine>     # machine = a directory under machines/
 ```
 
-`./setup` with no argument keeps the previously chosen machine or shows a menu. It records the choice as the gitignored symlink `machine -> machines/<name>` and links `.bashrc`, `.bash_profile`, `.zshrc`, `.zprofile`, `.tmux.conf`, `alacritty.toml`, `kitty/`, `nvim/`, `yazi/`, `scripts/tmux-sessionizer`, plus `yabai/`, `skhd/`, `.aerospace.toml` on macOS and `i3/`, `polybar/`, `rofi/`, `dunst/`, `picom/` on Linux. Existing files at a target are moved to `~/.config/old_config/<timestamp>/`. `install.sh` installs the i3 stack on Ubuntu.
+`./setup` with no argument keeps the previously chosen machine or shows a menu. It records the choice as the gitignored symlink `machine -> machines/<name>` and links `.zshrc`, `.zprofile`, `.tmux.conf`, `alacritty.toml`, `kitty/`, `nvim/`, `yazi/`, `scripts/tmux-sessionizer`, plus `yabai/`, `skhd/`, `.aerospace.toml` on macOS and `i3/`, `polybar/`, `rofi/`, `dunst/`, `picom/` on Linux. Existing files at a target are moved to `~/.config/old_config/<timestamp>/`, and `~/.bashrc` / `~/.bash_profile` links from older versions of this repo are removed. `install.sh` installs the i3 stack on Ubuntu. Switching a machine's login shell is a manual step: `chsh -s "$(command -v zsh)"`.
 
-`XDG_CONFIG_HOME` is overridden to `$HOME/.dotfiles` (see `.bash_profile`), so tools started from a shell read directly from this repo. The symlinks exist for tools started by the window manager, which do not see that variable.
+`XDG_CONFIG_HOME` is overridden to `$HOME/.dotfiles` (see `.zshrc`), so tools started from a shell read directly from this repo. The symlinks exist for tools started by the window manager, which do not see that variable.
 
 ## The machine mechanism
 
@@ -22,18 +22,18 @@ Every config that differs per machine includes a file from the `machine` symlink
 
 | Consumer | Includes | Holds |
 |---|---|---|
-| `.bashrc` / `.zshrc` via `shell/load.sh` | `machine/shell.sh` | VPN helpers, machine-only aliases and exports |
+| `.zshrc` | `machine/shell.zsh` | VPN helpers, machine-only aliases and exports |
 | `i3/config` | `machine/i3.conf` | xrandr layout, `workspace N output` |
 | `polybar/cuts/config.ini` | `machine/polybar.ini` | `[machine]` section: `monitor`, `network-interface`, referenced as `${machine.<key>}` |
 | `alacritty.toml` | `machine/alacritty.toml` | font size, decorations |
 | `kitty/kitty.conf` | `machine/kitty.conf` | font size, macOS option key |
 
-`.bashrc` also exports `DOTFILES_MACHINE` (the directory name) for ad-hoc checks. Adding a machine means creating `machines/<name>/` with these five files and running `./setup <name>`. OS-level differences (clipboard tool, Homebrew paths, pyenv) do not belong in `machines/`; they go in `shell/macos.sh` or `shell/linux.sh`, or use `if-shell`/`vim.fn.has` in the config itself.
+`.zshrc` also exports `DOTFILES_MACHINE` (the directory name) for ad-hoc checks. Adding a machine means creating `machines/<name>/` with these five files and running `./setup <name>`. OS-level differences (clipboard tool, Homebrew paths, pyenv) do not belong in `machines/`; they go in `shell/macos.zsh` or `shell/linux.zsh`, or use `if-shell`/`vim.fn.has` in the config itself.
 
 ## Layout
 
-- `.bashrc` and `.zshrc` — thin per-shell entry points. Both source `shell/load.sh` (which sets `XDG_CONFIG_HOME`, then sources `shell/common.sh`, `shell/macos.sh` or `shell/linux.sh` by `$OSTYPE`, then `machine/shell.sh`), then do only the shell-specific part (zoxide/fzf hooks, completion, prompt), then source `shell/localenv.sh`, which loads any files in `$HOME/.config/localenv/` (untracked secrets and overrides, see commit `08ac394`). `.zshrc` carries the powerlevel10k setup used on the Linux machines (instant prompt, theme lookup in the usual install locations, `~/.p10k.zsh`). `.bash_profile` / `.zprofile` only run Homebrew's shellenv and, for bash, source `.bashrc`.
-- `shell/` — `load.sh`, `localenv.sh`, `common.sh` (aliases, PATH for Go/Flutter/Rust/uv, yazi `y` wrapper), `macos.sh`, `linux.sh`. Everything in `shell/` and `machines/*/shell.sh` must be valid in both bash and zsh. macOS ships bash 3.2, so `.bashrc` skips the zoxide and fzf completions there (they need bash 4+).
+- `.zshrc` — the shell entry point. Sets `XDG_CONFIG_HOME`, sources `shell/common.zsh`, then `shell/macos.zsh` or `shell/linux.zsh` by `$OSTYPE`, then `machine/shell.zsh`, then sets up completion, zoxide, fzf and powerlevel10k (instant prompt, theme lookup in the usual install locations, `~/.p10k.zsh`), and finally sources any files in `$HOME/.config/localenv/` (untracked secrets and overrides, see commit `08ac394`). `.zprofile` only runs Homebrew's shellenv. `~/.zshenv` is not tracked.
+- `shell/` — `common.zsh` (aliases, PATH for Go/Flutter/Rust/uv, yazi `y` wrapper), `macos.zsh`, `linux.zsh`.
 - `machines/` — `macbook/`, `i3-desktop/` (two 1920x1200 HDMI monitors), `i3-laptop/`. Rename the directories freely; nothing refers to them by name except the `machine` symlink.
 - `.tmux.conf` — tmux with vi-mode, vim-style pane navigation (`h/j/k/l`), and window-switch bindings on the shifted number-row keys (`+[{(&=)}]*` → windows 1–10). The clipboard command is chosen by `if-shell` (pbcopy / xclip), tpm is only loaded when installed.
 - `.aerospace.toml`, `yabai/`, `skhd/` — macOS tiling setups with i3-style keybindings (`alt-j/k/l/;` for focus).

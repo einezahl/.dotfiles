@@ -1,10 +1,10 @@
-# Shell settings shared by every machine and by bash and zsh. Sourced from
-# shell/load.sh before the OS file (shell/macos.sh or shell/linux.sh) and
-# the machine file (machine/shell.sh).
+# Shell settings shared by every machine. Sourced from .zshrc before the
+# OS file (shell/macos.zsh or shell/linux.zsh) and the machine file
+# (machine/shell.zsh).
 
 # Node version manager
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+[[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
 
 # Go
 export GOPATH="$HOME/go"
@@ -18,10 +18,10 @@ export PATH="$PATH:$HOME/.pub-cache/bin"
 export PATH="$PATH:$HOME/.local/bin"
 
 # Rust
-[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+[[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
 
 # uv
-[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+[[ -f "$HOME/.local/bin/env" ]] && source "$HOME/.local/bin/env"
 
 alias ll='ls -alF'
 alias v=nvim
@@ -43,7 +43,7 @@ y() {
     local tmp cwd
     tmp="$(mktemp -t yazi-cwd.XXXXXX)"
     yazi "$@" --cwd-file="$tmp"
-    if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    if cwd="$(command cat -- "$tmp")" && [[ -n "$cwd" ]] && [[ "$cwd" != "$PWD" ]]; then
         builtin cd -- "$cwd"
     fi
     rm -f -- "$tmp"
