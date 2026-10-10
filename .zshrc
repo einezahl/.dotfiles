@@ -42,6 +42,7 @@ eval "$(zoxide init zsh)"
 #   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
 for p10k in \
     /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme \
+    /usr/local/share/powerlevel10k/powerlevel10k.zsh-theme \
     /usr/share/powerlevel10k/powerlevel10k.zsh-theme \
     /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme \
     "$HOME/powerlevel10k/powerlevel10k.zsh-theme" \
