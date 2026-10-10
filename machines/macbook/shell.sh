@@ -4,3 +4,4 @@
 export DATASET_ROOT_PATH="/Users/einezahl/sciebo - Reclik, Tom (08QXP2@rwth-aachen.de)@rwth-aachen.sciebo.de/datasets"
 
 alias phd="cd $HOME/Documents/Obsidian/phd"
+alias venvBrownie='source ~/dev/crypto/brownie/venv/bin/activate'

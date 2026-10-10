@@ -12,7 +12,7 @@ Personal dotfiles for three machines: a MacBook (yabai/skhd or AeroSpace) and tw
 cd ~/.dotfiles && ./setup <machine>     # machine = a directory under machines/
 ```
 
-`./setup` with no argument keeps the previously chosen machine or shows a menu. It records the choice as the gitignored symlink `machine -> machines/<name>` and links `.bashrc`, `.bash_profile`, `.tmux.conf`, `alacritty.toml`, `kitty/`, `nvim/`, `yazi/`, `scripts/tmux-sessionizer`, plus `yabai/`, `skhd/`, `.aerospace.toml` on macOS and `i3/`, `polybar/`, `rofi/`, `dunst/`, `picom/` on Linux. Existing files at a target are moved to `~/.config/old_config/<timestamp>/`. `install.sh` installs the i3 stack on Ubuntu.
+`./setup` with no argument keeps the previously chosen machine or shows a menu. It records the choice as the gitignored symlink `machine -> machines/<name>` and links `.bashrc`, `.bash_profile`, `.zshrc`, `.zprofile`, `.tmux.conf`, `alacritty.toml`, `kitty/`, `nvim/`, `yazi/`, `scripts/tmux-sessionizer`, plus `yabai/`, `skhd/`, `.aerospace.toml` on macOS and `i3/`, `polybar/`, `rofi/`, `dunst/`, `picom/` on Linux. Existing files at a target are moved to `~/.config/old_config/<timestamp>/`. `install.sh` installs the i3 stack on Ubuntu.
 
 `XDG_CONFIG_HOME` is overridden to `$HOME/.dotfiles` (see `.bash_profile`), so tools started from a shell read directly from this repo. The symlinks exist for tools started by the window manager, which do not see that variable.
 
@@ -22,7 +22,7 @@ Every config that differs per machine includes a file from the `machine` symlink
 
 | Consumer | Includes | Holds |
 |---|---|---|
-| `.bashrc` | `machine/shell.sh` | VPN helpers, machine-only aliases and exports |
+| `.bashrc` / `.zshrc` via `shell/load.sh` | `machine/shell.sh` | VPN helpers, machine-only aliases and exports |
 | `i3/config` | `machine/i3.conf` | xrandr layout, `workspace N output` |
 | `polybar/cuts/config.ini` | `machine/polybar.ini` | `[machine]` section: `monitor`, `network-interface`, referenced as `${machine.<key>}` |
 | `alacritty.toml` | `machine/alacritty.toml` | font size, decorations |
@@ -32,8 +32,8 @@ Every config that differs per machine includes a file from the `machine` symlink
 
 ## Layout
 
-- `.bashrc` — sources `shell/common.sh`, then `shell/macos.sh` or `shell/linux.sh` by `$OSTYPE`, then `machine/shell.sh`, then any files in `$HOME/.config/localenv/` (untracked secrets and overrides, see commit `08ac394`). `.bash_profile` handles Homebrew's shellenv, sources `.bashrc`, and sets `XDG_CONFIG_HOME`.
-- `shell/` — `common.sh` (aliases, PATH for Go/Flutter/Rust/uv, zoxide, fzf, yazi `y` wrapper, prompt), `macos.sh`, `linux.sh`.
+- `.bashrc` and `.zshrc` — thin per-shell entry points. Both source `shell/load.sh` (which sets `XDG_CONFIG_HOME`, then sources `shell/common.sh`, `shell/macos.sh` or `shell/linux.sh` by `$OSTYPE`, then `machine/shell.sh`), then do only the shell-specific part (zoxide/fzf hooks, completion, prompt), then source `shell/localenv.sh`, which loads any files in `$HOME/.config/localenv/` (untracked secrets and overrides, see commit `08ac394`). `.zshrc` carries the powerlevel10k setup used on the Linux machines (instant prompt, theme lookup in the usual install locations, `~/.p10k.zsh`). `.bash_profile` / `.zprofile` only run Homebrew's shellenv and, for bash, source `.bashrc`.
+- `shell/` — `load.sh`, `localenv.sh`, `common.sh` (aliases, PATH for Go/Flutter/Rust/uv, yazi `y` wrapper), `macos.sh`, `linux.sh`. Everything in `shell/` and `machines/*/shell.sh` must be valid in both bash and zsh. macOS ships bash 3.2, so `.bashrc` skips the zoxide and fzf completions there (they need bash 4+).
 - `machines/` — `macbook/`, `i3-desktop/` (two 1920x1200 HDMI monitors), `i3-laptop/`. Rename the directories freely; nothing refers to them by name except the `machine` symlink.
 - `.tmux.conf` — tmux with vi-mode, vim-style pane navigation (`h/j/k/l`), and window-switch bindings on the shifted number-row keys (`+[{(&=)}]*` → windows 1–10). The clipboard command is chosen by `if-shell` (pbcopy / xclip), tpm is only loaded when installed.
 - `.aerospace.toml`, `yabai/`, `skhd/` — macOS tiling setups with i3-style keybindings (`alt-j/k/l/;` for focus).

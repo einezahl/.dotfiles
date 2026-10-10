@@ -1,33 +1,23 @@
-# Shared entry point for all machines. The actual settings live in
-#   shell/common.sh      everything shared
-#   shell/macos.sh       macOS only
-#   shell/linux.sh       Linux only
-#   machine/shell.sh     this machine only (machine -> machines/<name>, set by ./setup)
+# bash entry point. The settings live in shell/ (see shell/load.sh); only
+# bash-specific integrations are here. .zshrc is the zsh counterpart.
 
 # If not running interactively, for example when executing a script,
 # don't do anything
 [[ $- != *i* ]] && return
 
-export DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+source "$HOME/.dotfiles/shell/load.sh"
 
-# Name of this machine, taken from the gitignored `machine` symlink
-if [ -L "$DOTFILES/machine" ]; then
-    export DOTFILES_MACHINE="$(basename "$(readlink "$DOTFILES/machine")")"
+# zoxide and fzf completions need bash 4+. macOS ships bash 3.2, where the
+# completion code does not even parse, so only the commands are loaded there.
+if (( BASH_VERSINFO[0] >= 4 )); then
+    eval "$(zoxide init bash)"
+    [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+else
+    eval "$(zoxide init bash | sed -n '1,/^# Load completions/p')"
 fi
 
-source "$DOTFILES/shell/common.sh"
+[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
 
-case "$OSTYPE" in
-    darwin*) source "$DOTFILES/shell/macos.sh" ;;
-    linux*)  source "$DOTFILES/shell/linux.sh" ;;
-esac
+PS1="\W:$"
 
-[ -r "$DOTFILES/machine/shell.sh" ] && source "$DOTFILES/machine/shell.sh"
-
-# Secrets and overrides that are not tracked in git
-LOCALENV="$HOME/.config/localenv/"
-if [ -d "$LOCALENV" ]; then
-    for i in $(find -L "$LOCALENV" -type f); do
-        source "$i"
-    done
-fi
+source "$HOME/.dotfiles/shell/localenv.sh"

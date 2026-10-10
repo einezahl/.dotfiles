@@ -1,11 +1,10 @@
-# Shell settings shared by every machine. Sourced from .bashrc before the
-# OS-specific file (shell/macos.sh or shell/linux.sh) and the machine file
-# (machine/shell.sh).
+# Shell settings shared by every machine and by bash and zsh. Sourced from
+# shell/load.sh before the OS file (shell/macos.sh or shell/linux.sh) and
+# the machine file (machine/shell.sh).
 
 # Node version manager
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
 
 # Go
 export GOPATH="$HOME/go"
@@ -14,6 +13,9 @@ export PATH="$PATH:$GOPATH/bin"
 # Flutter / Dart
 export PATH="$PATH:$HOME/dev/tools/flutter/bin"
 export PATH="$PATH:$HOME/.pub-cache/bin"
+
+# pipx, uv tools and our own scripts
+export PATH="$PATH:$HOME/.local/bin"
 
 # Rust
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
@@ -46,9 +48,3 @@ y() {
     fi
     rm -f -- "$tmp"
 }
-
-eval "$(zoxide init bash)"
-
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
-PS1="\W:$"

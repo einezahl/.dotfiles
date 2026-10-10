@@ -68,6 +68,8 @@ link() {
 # shared by all machines
 link .bashrc                  "$HOME/.bashrc"
 link .bash_profile            "$HOME/.bash_profile"
+link .zshrc                   "$HOME/.zshrc"
+link .zprofile                "$HOME/.zprofile"
 link .tmux.conf               "$HOME/.tmux.conf"
 link alacritty.toml           "$CONFIG/alacritty/alacritty.toml"
 link kitty                    "$CONFIG/kitty"
