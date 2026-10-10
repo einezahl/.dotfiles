@@ -32,7 +32,7 @@ Every config that differs per machine includes a file from the `machine` symlink
 
 ## Layout
 
-- `.zshrc` — the shell entry point. Sets `XDG_CONFIG_HOME`, sources `shell/common.zsh`, then `shell/macos.zsh` or `shell/linux.zsh` by `$OSTYPE`, then `machine/shell.zsh`, then sets up completion, zoxide, fzf and powerlevel10k (instant prompt, theme lookup in the usual install locations, `~/.p10k.zsh`), and finally sources any files in `$HOME/.config/localenv/` (untracked secrets and overrides, see commit `08ac394`). `.zprofile` only runs Homebrew's shellenv. `~/.zshenv` is not tracked.
+- `.zshrc` — the shell entry point. Sets `XDG_CONFIG_HOME`, sources `shell/common.zsh`, then `shell/macos.zsh` or `shell/linux.zsh` by `$OSTYPE`, then `machine/shell.zsh`, then sets up completion, zoxide, fzf and powerlevel10k (instant prompt, theme lookup in the usual install locations, then the shared prompt layout `.p10k.zsh` from this repo, falling back to `~/.p10k.zsh`), and finally sources any files in `$HOME/.config/localenv/` (untracked secrets and overrides, see commit `08ac394`). `.zprofile` only runs Homebrew's shellenv. `~/.zshenv` is not tracked.
 - `shell/` — `common.zsh` (aliases, PATH for Go/Flutter/Rust/uv, yazi `y` wrapper), `macos.zsh`, `linux.zsh`.
 - `machines/` — `macbook/`, `i3-desktop/` (two 1920x1200 HDMI monitors), `i3-laptop/`. Rename the directories freely; nothing refers to them by name except the `machine` symlink.
 - `.tmux.conf` — tmux with vi-mode, vim-style pane navigation (`h/j/k/l`), and window-switch bindings on the shifted number-row keys (`+[{(&=)}]*` → windows 1–10). The clipboard command is chosen by `if-shell` (pbcopy / xclip), tpm is only loaded when installed.
