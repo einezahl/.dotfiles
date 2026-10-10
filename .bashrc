@@ -13,11 +13,6 @@ export PATH="$PATH:/Users/einezahl/dev/tools/flutter/bin"
 export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 export PATH="$PATH":"$HOME/.pub-cache/bin"
 
-# Pyenv initialization
-if command -v pyenv 1>/dev/null 2>&1; then
-	eval "$(pyenv init -)"
-fi
-
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
@@ -42,6 +37,17 @@ alias ppy="export PYTHONPATH='${PYTHONPATH}:${PWD}' && \
     source .venv/bin/activate && \
     echo 'Exported PYTHONPATH'"
 
+# yazi: quit with q to cd into the last visited directory
+y() {
+    local tmp cwd
+    tmp="$(mktemp -t yazi-cwd.XXXXXX)"
+    yazi "$@" --cwd-file="$tmp"
+    if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+        builtin cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
+}
+
 eval "$(zoxide init bash)"
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
@@ -55,3 +61,8 @@ if [ -d "$LOCALENV" ]; then
         source "$i"
     done
 fi
+
+. "$HOME/.local/bin/env"
+
+# opencode
+export PATH=/Users/einezahl/.opencode/bin:$PATH

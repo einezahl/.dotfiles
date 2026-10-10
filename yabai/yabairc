@@ -1,0 +1,42 @@
+#!/usr/bin/env sh
+
+# Load the scripting addition (requires SIP partially disabled and the
+# sudoers entry — see README note in skhd/skhdrc header).
+# The signal reloads it whenever Dock.app restarts.
+yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
+sudo yabai --load-sa
+
+# layout
+yabai -m config layout bsp
+yabai -m config window_placement second_child
+
+# i3-like focus behavior
+yabai -m config focus_follows_mouse autoraise
+yabai -m config mouse_follows_focus off
+
+# move/resize windows with alt + mouse drag, like i3
+yabai -m config mouse_modifier alt
+yabai -m config mouse_action1 move
+yabai -m config mouse_action2 resize
+yabai -m config mouse_drop_action swap
+
+# no gaps, no padding (i3 defaults)
+yabai -m config top_padding 0
+yabai -m config bottom_padding 0
+yabai -m config left_padding 0
+yabai -m config right_padding 0
+yabai -m config window_gap 0
+
+# focus a window on the target space after switching, so keyboard focus
+# follows the switch (macOS otherwise keeps the previous app active).
+# Needs jq.
+yabai -m signal --add event=space_changed action='yabai -m window --focus "$(yabai -m query --windows --space | jq -r ".[0].id")" 2>/dev/null || true'
+
+# leave small system windows alone
+# app names are localized (German UI), match both; the German name may
+# contain a soft hyphen, hence the loose pattern
+yabai -m rule --add app="System.*(Settings|einstellungen)" manage=off
+yabai -m rule --add app="^(Calculator|Rechner)$" manage=off
+yabai -m rule --add app="^Archive Utility$" manage=off
+
+echo "yabai config loaded"

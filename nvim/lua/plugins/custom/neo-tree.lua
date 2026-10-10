@@ -119,7 +119,7 @@ return {
     commands = {},
     window = {
       position = 'left',
-      width = 60,
+      width = 30,
       mapping_options = {
         noremap = true,
         nowait = true,
@@ -279,7 +279,7 @@ return {
     },
     git_status = {
       window = {
-        position = 'float',
+        position = 'left',
         mappings = {
           ['A'] = 'git_add_all',
           ['gu'] = 'git_unstage_file',

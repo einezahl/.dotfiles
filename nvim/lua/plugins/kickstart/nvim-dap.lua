@@ -27,26 +27,6 @@ return {
     local dap = require 'dap'
     local dapui = require 'dapui'
 
-    dap.configurations.python = {
-      {
-        type = 'python (conda base)',
-        request = 'launch',
-        name = 'Launch file',
-        program = '${file}',
-        pythonPath = function()
-          return '/home/thomas/miniconda3/bin/python3'
-        end,
-      },
-      {
-        type = 'python (system integrations)',
-        request = 'launch',
-        name = 'Launch file',
-        program = '${file}',
-        pythonPath = function()
-          return '/mnt/d/system_integrations/python/virtualenv/Scripts/python.exe'
-        end,
-      },
-    }
     -- Configure the CoreCLR adapter
     dap.adapters.coreclr = {
       type = 'executable',
@@ -104,14 +84,26 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'debugpy',
       },
     }
 
-    -- Basic debugging keymaps, feel free to change to your liking!
-    vim.keymap.set('n', '<F5>', dap.continue, { desc = 'Debug: Start/Continue' })
-    vim.keymap.set('n', '<F1>', dap.step_into, { desc = 'Debug: Step Into' })
-    vim.keymap.set('n', '<F2>', dap.step_over, { desc = 'Debug: Step Over' })
-    vim.keymap.set('n', '<F3>', dap.step_out, { desc = 'Debug: Step Out' })
+    require('dap-python').setup(vim.fn.stdpath 'data' .. '/mason/packages/debugpy/venv/bin/python')
+
+    vim.keymap.set('n', '<leader>dn', function()
+      require('dap-python').test_method()
+    end, { desc = 'Debug: Test [N]earest method' })
+    vim.keymap.set('n', '<leader>df', function()
+      require('dap-python').test_class()
+    end, { desc = 'Debug: Test [F]ile (class)' })
+    vim.keymap.set('v', '<leader>ds', function()
+      require('dap-python').debug_selection()
+    end, { desc = 'Debug: [S]election' })
+
+    vim.keymap.set('n', '<leader>dc', dap.continue, { desc = 'Debug: Start/[C]ontinue' })
+    vim.keymap.set('n', '<leader>di', dap.step_into, { desc = 'Debug: Step [I]nto' })
+    vim.keymap.set('n', '<leader>do', dap.step_over, { desc = 'Debug: Step [O]ver' })
+    vim.keymap.set('n', '<leader>dO', dap.step_out, { desc = 'Debug: Step [O]ut' })
     vim.keymap.set('n', '<leader>b', dap.toggle_breakpoint, { desc = 'Debug: Toggle Breakpoint' })
     vim.keymap.set('n', '<leader>B', function()
       dap.set_breakpoint(vim.fn.input 'Breakpoint condition: ')
@@ -140,7 +132,7 @@ return {
     }
 
     -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
-    vim.keymap.set('n', '<F7>', dapui.toggle, { desc = 'Debug: See last session result.' })
+    vim.keymap.set('n', '<leader>du', dapui.toggle, { desc = 'Debug: Toggle [U]I / see last result' })
 
     dap.listeners.after.event_initialized['dapui_config'] = dapui.open
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close

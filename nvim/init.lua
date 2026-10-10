@@ -90,6 +90,8 @@ require 'config.autocmds'
 
 require 'config.keymaps'
 
+require 'config.config'
+
 require 'lazy-bootstrap'
 
 require 'lazy-plugins'

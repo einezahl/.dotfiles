@@ -27,10 +27,11 @@ require('lazy').setup({
   require 'plugins.custom.rosepine',
   require 'plugins.custom.lsp_signature',
   require 'plugins.custom.feline',
+  require 'plugins.custom.obsidian',
   -- require 'plugins.custom.image',
   -- require 'plugins.custom.molten-nvim',
   -- require 'plugins.custom.lazygit',
-  -- require 'plugins.custom.neo-tree',
+  require 'plugins.custom.neo-tree',
   -- require 'plugins.custom.toggleterm',
 
   -- Kickstart standard plugins
