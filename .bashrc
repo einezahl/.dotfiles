@@ -1,68 +1,33 @@
+# Shared entry point for all machines. The actual settings live in
+#   shell/common.sh      everything shared
+#   shell/macos.sh       macOS only
+#   shell/linux.sh       Linux only
+#   machine/shell.sh     this machine only (machine -> machines/<name>, set by ./setup)
+
 # If not running interactively, for example when executing a script,
 # don't do anything
 [[ $- != *i* ]] && return
 
-export BASH_SILENCE_DEPRECATION_WARNING=1
+export DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"
-alias ll='ls -alF'
+# Name of this machine, taken from the gitignored `machine` symlink
+if [ -L "$DOTFILES/machine" ]; then
+    export DOTFILES_MACHINE="$(basename "$(readlink "$DOTFILES/machine")")"
+fi
 
-# Flutter
-export PATH="$PATH:/Users/einezahl/dev/tools/flutter/bin"
-export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
-export PATH="$PATH":"$HOME/.pub-cache/bin"
+source "$DOTFILES/shell/common.sh"
 
-export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+case "$OSTYPE" in
+    darwin*) source "$DOTFILES/shell/macos.sh" ;;
+    linux*)  source "$DOTFILES/shell/linux.sh" ;;
+esac
 
-# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-export PATH="$PATH:$HOME/.rvm/bin"
-export LDFLAGS="-L/opt/homebrew/opt/openssl@1.1/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/openssl@1.1/include"
+[ -r "$DOTFILES/machine/shell.sh" ] && source "$DOTFILES/machine/shell.sh"
 
-export GOPATH=$HOME/go
-export PATH=$PATH:$GOPATH/bin
-
-# Export default dataset location
-export DATASET_ROOT_PATH="/Users/einezahl/sciebo - Reclik, Tom (08QXP2@rwth-aachen.de)@rwth-aachen.sciebo.de/datasets"
-
-alias cd=z
-alias ..="cd .."
-alias phd="cd /Users/einezahl/Documents/Obsidian/phd"
-alias dot="cd /Users/einezahl/.dotfiles"
-alias ssh="TERM=xterm-256color ssh"
-alias copy="pbcopy"
-alias cenv="python3 -m venv .venv"
-alias ppy="export PYTHONPATH='${PYTHONPATH}:${PWD}' && \
-    source .venv/bin/activate && \
-    echo 'Exported PYTHONPATH'"
-
-# yazi: quit with q to cd into the last visited directory
-y() {
-    local tmp cwd
-    tmp="$(mktemp -t yazi-cwd.XXXXXX)"
-    yazi "$@" --cwd-file="$tmp"
-    if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-        builtin cd -- "$cwd"
-    fi
-    rm -f -- "$tmp"
-}
-
-eval "$(zoxide init bash)"
-
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
-. "$HOME/.cargo/env"
-
-PS1="\W:$"
-
+# Secrets and overrides that are not tracked in git
 LOCALENV="$HOME/.config/localenv/"
 if [ -d "$LOCALENV" ]; then
     for i in $(find -L "$LOCALENV" -type f); do
         source "$i"
     done
 fi
-
-. "$HOME/.local/bin/env"
-
-# opencode
-export PATH=/Users/einezahl/.opencode/bin:$PATH

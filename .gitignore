@@ -20,3 +20,13 @@ other_configurations/
 # old nvim configs
 nvim-thomas/
 nvim_chad/
+
+# chosen by ./setup <machine>, points at machines/<name>
+/machine
+
+# more incidental tool state
+homebrew/
+swiftpm/
+uv/
+opencode/node_modules/
+.claude/settings.local.json

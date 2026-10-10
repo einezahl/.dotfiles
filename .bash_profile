@@ -1,4 +1,4 @@
-# Only run on macOS
+# Login shell entry point. Everything interactive lives in .bashrc.
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   # needed for brew
@@ -9,20 +9,5 @@ if [ -r ~/.bashrc ]; then
   source ~/.bashrc
 fi
 
-export PYENV_ROOT="$HOME/.pyenv"
-[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
+# Tools that honor XDG read their config straight from this repo
 export XDG_CONFIG_HOME="$HOME"/.dotfiles
-. "$HOME/.cargo/env"
-
-##
-# Your previous /Users/einezahl/.bash_profile file was backed up as /Users/einezahl/.bash_profile.macports-saved_2024-10-24_at_20:37:53
-##
-
-# MacPorts Installer addition on 2024-10-24_at_20:37:53: adding an appropriate PATH variable for use with MacPorts.
-export PATH="/opt/local/bin:/opt/local/sbin:$PATH"
-# Finished adapting your PATH environment variable for use with MacPorts.
-
-
-. "$HOME/.local/bin/env"

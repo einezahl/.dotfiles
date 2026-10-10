@@ -1,0 +1,7 @@
+# MacBook: large font, no title bar (used with a tiling window manager)
+
+[font]
+size = 20
+
+[window]
+decorations = "none"

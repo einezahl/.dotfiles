@@ -5,6 +5,9 @@
 # set mod
 set $mod Mod1
 
+# machine-specific part (display layout, workspace outputs), selected by ./setup <machine>
+include $HOME/.dotfiles/machine/i3.conf
+
 # set font
 font pango:Ubuntu Nerd Font 11
 

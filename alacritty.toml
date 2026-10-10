@@ -1,6 +1,7 @@
-[font]
-size = 20
+# Shared alacritty config. Font size and window decorations come from the
+# machine file (machine -> machines/<name>, set by ./setup).
+# Alacritty 0.14+ expects this under [general]; 0.13 reads it at top level.
+import = ["~/.dotfiles/machine/alacritty.toml"]
 
 [font.normal]
 family = "UbuntuMono Nerd Font"
-

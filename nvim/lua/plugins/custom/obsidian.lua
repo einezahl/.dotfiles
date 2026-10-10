@@ -20,7 +20,7 @@ return {
     workspaces = {
       {
         name = 'personal',
-        path = '/Users/einezahl/obsidian/phd',
+        path = vim.fn.expand '~/obsidian/phd',
       },
       -- {
       --   name = 'work',

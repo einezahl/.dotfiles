@@ -1,17 +1,91 @@
-export XDG_CONFIG_HOME="$HOME"/.config
-mkdir -p "$XDG_CONFIG_HOME"/bash
-mkdir -p "$XDG_CONFIG_HOME"/alacritty
+#!/usr/bin/env bash
+# Link the tracked configs into $HOME and record which machine this is.
+#
+#   ./setup [machine]
+#
+# machine is a directory name under machines/. Without an argument the
+# previously chosen machine is kept, otherwise a menu is shown. The choice
+# is stored as the gitignored symlink `machine -> machines/<name>`, which
+# .bashrc, i3, polybar, alacritty and kitty include from.
+#
+# Existing files at a link target are moved to ~/.config/old_config/<timestamp>/.
 
-mkdir -p "$HOME"/.local/bin
+set -euo pipefail
 
-ln -sf "$PWD/alacritty.toml" "$XDG_CONFIG_HOME"/alacritty/alacritty.toml
-ln -sfn "$PWD/kitty" "$XDG_CONFIG_HOME"/kitty
-ln -sfn "$PWD/yazi" "$XDG_CONFIG_HOME"/yazi
-ln -sfn "$PWD/yabai" "$XDG_CONFIG_HOME"/yabai
-ln -sfn "$PWD/skhd" "$XDG_CONFIG_HOME"/skhd
-ln -sf "$PWD/.bash_profile" "$HOME"/.bash_profile
-ln -sf "$PWD/.bashrc" "$HOME"/.bashrc
-ln -sf "$PWD/.tmux.conf" "$HOME"/.tmux.conf
-ln -sf "$PWD/nvim" "$XDG_CONFIG_HOME"/nvim
-ln -sf "$PWD/scripts/tmux-sessionizer" "$HOME"/.local/bin/tmux-sessionizer
+DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG="$HOME/.config"
+BACKUP="$CONFIG/old_config/$(date +%Y-%m-%d_%H-%M-%S)"
 
+# --- which machine -----------------------------------------------------------
+
+machines=()
+for d in "$DOTFILES"/machines/*/; do
+    machines+=("$(basename "$d")")
+done
+
+choose_machine() {
+    if command -v fzf >/dev/null 2>&1; then
+        printf '%s\n' "${machines[@]}" | fzf --prompt='machine> ' --height=10
+    else
+        PS3='machine> '
+        select m in "${machines[@]}"; do
+            [ -n "$m" ] && echo "$m" && break
+        done
+    fi
+}
+
+machine="${1:-}"
+if [ -z "$machine" ] && [ -L "$DOTFILES/machine" ]; then
+    machine="$(basename "$(readlink "$DOTFILES/machine")")"
+fi
+if [ -z "$machine" ]; then
+    machine="$(choose_machine)"
+fi
+if [ -z "$machine" ] || [ ! -d "$DOTFILES/machines/$machine" ]; then
+    echo "unknown machine '$machine'. Available: ${machines[*]}" >&2
+    exit 1
+fi
+
+ln -sfn "machines/$machine" "$DOTFILES/machine"
+echo "machine: $machine"
+
+# --- linking -----------------------------------------------------------------
+
+# link <path relative to this repo> <target>
+link() {
+    local src="$DOTFILES/$1" dst="$2"
+    mkdir -p "$(dirname "$dst")"
+    if [ -L "$dst" ]; then
+        rm "$dst"
+    elif [ -e "$dst" ]; then
+        mkdir -p "$BACKUP"
+        mv "$dst" "$BACKUP/$(basename "$dst")"
+        echo "moved existing $dst to $BACKUP/"
+    fi
+    ln -s "$src" "$dst"
+}
+
+# shared by all machines
+link .bashrc                  "$HOME/.bashrc"
+link .bash_profile            "$HOME/.bash_profile"
+link .tmux.conf               "$HOME/.tmux.conf"
+link alacritty.toml           "$CONFIG/alacritty/alacritty.toml"
+link kitty                    "$CONFIG/kitty"
+link nvim                     "$CONFIG/nvim"
+link yazi                     "$CONFIG/yazi"
+link scripts/tmux-sessionizer "$HOME/.local/bin/tmux-sessionizer"
+
+case "$OSTYPE" in
+    darwin*)
+        link .aerospace.toml "$HOME/.aerospace.toml"
+        link yabai           "$CONFIG/yabai"
+        link skhd            "$CONFIG/skhd"
+        ;;
+    linux*)
+        for d in i3 polybar rofi dunst picom; do
+            link "$d" "$CONFIG/$d"
+        done
+        ;;
+esac
+
+echo "done"
