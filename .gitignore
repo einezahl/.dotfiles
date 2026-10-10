@@ -1,9 +1,22 @@
-configstore/
+# lockfiles and logs
 *lock.json
 lazyvim.json
+**.log
+
+# tool state that lands here because XDG_CONFIG_HOME points at this repo
+configstore/
 lazygit/
 glow/
 crossstore/
+crossnote/
+github-copilot/
+mimeapps.list
+.android/
+Android Open Source Project/
+eas-cli-nodejs/
+Google/
+other_configurations/
+
+# old nvim configs
 nvim-thomas/
 nvim_chad/
-
