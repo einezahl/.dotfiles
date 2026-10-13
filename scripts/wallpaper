@@ -10,7 +10,11 @@
 #
 # Folder: $WALLPAPER_DIR, else ~/Pictures/Wallpaper, else ~/Pictures/wallpaper.
 # The last choice is remembered in ~/.local/state/wallpaper/current.
-# macOS sets the picture through System Events, Linux uses feh.
+#
+# Meant for the i3 machines (feh, bound to $mod+Shift+w, hourly via
+# systemd/user/wallpaper.timer). On macOS it only sets the display default
+# and the current space, each space keeps its own override, so there the
+# rotation is configured in System Settings > Wallpaper instead.
 
 set -euo pipefail
 

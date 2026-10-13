@@ -90,15 +90,8 @@ case "$OSTYPE" in
         link .aerospace.toml "$HOME/.aerospace.toml"
         link yabai           "$CONFIG/yabai"
         link skhd            "$CONFIG/skhd"
-
-        # hourly wallpaper change: launchd agent, generated from the template
-        # because launchd needs absolute paths
-        agent="$HOME/Library/LaunchAgents/com.einezahl.wallpaper.plist"
-        mkdir -p "$(dirname "$agent")"
-        launchctl bootout "gui/$(id -u)" "$agent" 2>/dev/null || true
-        sed "s|__HOME__|$HOME|g" "$DOTFILES/launchd/com.einezahl.wallpaper.plist" > "$agent"
-        launchctl bootstrap "gui/$(id -u)" "$agent"
-        echo "loaded launchd agent com.einezahl.wallpaper"
+        # wallpaper rotation on macOS is done in System Settings > Wallpaper
+        # (add the folder, "change picture" hourly); scripts/wallpaper is for i3
         ;;
     linux*)
         for d in i3 polybar rofi dunst picom; do

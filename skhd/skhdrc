@@ -60,10 +60,6 @@ cmd + shift - 0 : yabai -m window --space 10
 
 # restart yabai (skhd reloads itself automatically)
 alt + shift - c : yabai --restart-service
-
-# next wallpaper from ~/Pictures/Wallpaper (scripts/wallpaper)
-alt + shift - w : ~/.local/bin/wallpaper
-
 # ---- resize mode, i3-style (@ swallows unbound keys while in the mode) ----
 :: default
 :: resize @

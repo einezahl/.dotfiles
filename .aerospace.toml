@@ -78,10 +78,6 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
     cmd-shift-0 = 'move-node-to-workspace 10'
 
     alt-shift-c = 'reload-config'
-
-    # next wallpaper from ~/Pictures/Wallpaper (scripts/wallpaper)
-    alt-shift-w = 'exec-and-forget ~/.local/bin/wallpaper'
-
     alt-r = 'mode resize'
 
 [mode.resize.binding]
