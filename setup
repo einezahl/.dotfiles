@@ -81,7 +81,9 @@ link alacritty.toml           "$CONFIG/alacritty/alacritty.toml"
 link kitty                    "$CONFIG/kitty"
 link nvim                     "$CONFIG/nvim"
 link yazi                     "$CONFIG/yazi"
-link scripts/tmux-sessionizer "$HOME/.local/bin/tmux-sessionizer"
+for s in "$DOTFILES"/scripts/*; do
+    link "scripts/$(basename "$s")" "$HOME/.local/bin/$(basename "$s")"
+done
 
 case "$OSTYPE" in
     darwin*)

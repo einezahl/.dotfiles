@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# Cycle the desktop wallpaper through the images in a folder.
+#
+#   wallpaper            next image in alphabetical order, wraps around
+#   wallpaper prev       previous image
+#   wallpaper random     random image
+#   wallpaper restore    re-apply the last chosen image (for WM startup)
+#   wallpaper <file>     this image
+#   wallpaper --print    with any of the above: only print the choice
+#
+# Folder: $WALLPAPER_DIR, else ~/Pictures/Wallpaper, else ~/Pictures/wallpaper.
+# The last choice is remembered in ~/.local/state/wallpaper/current.
+# macOS sets the picture through System Events, Linux uses feh.
+
+set -euo pipefail
+
+if [[ -n "${WALLPAPER_DIR:-}" ]]; then
+    dir="$WALLPAPER_DIR"
+elif [[ -d "$HOME/Pictures/Wallpaper" ]]; then
+    dir="$HOME/Pictures/Wallpaper"
+else
+    dir="$HOME/Pictures/wallpaper"
+fi
+state="${XDG_STATE_HOME:-$HOME/.local/state}/wallpaper/current"
+
+print_only=false
+mode="next"
+for arg in "$@"; do
+    case "$arg" in
+        --print) print_only=true ;;
+        *) mode="$arg" ;;
+    esac
+done
+
+if [[ ! -d "$dir" ]]; then
+    echo "wallpaper: folder not found: $dir" >&2
+    exit 1
+fi
+
+images=()
+while IFS= read -r f; do
+    images+=("$f")
+done < <(find "$dir" -maxdepth 1 -type f \
+            \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.heic' -o -iname '*.webp' \) \
+         | sort)
+
+if [[ ${#images[@]} -eq 0 ]]; then
+    echo "wallpaper: no images in $dir" >&2
+    exit 1
+fi
+
+current=""
+[[ -f "$state" ]] && current="$(<"$state")"
+
+# index of the current image in the list, -1 if unknown
+index=-1
+for i in "${!images[@]}"; do
+    if [[ "${images[$i]}" == "$current" ]]; then
+        index=$i
+        break
+    fi
+done
+
+case "$mode" in
+    next)    choice="${images[$(( (index + 1) % ${#images[@]} ))]}" ;;
+    prev)    choice="${images[$(( (index - 1 + ${#images[@]}) % ${#images[@]} ))]}" ;;
+    random)  choice="${images[$(( RANDOM % ${#images[@]} ))]}" ;;
+    restore) choice="${current:-${images[0]}}" ;;
+    *)
+        choice="$mode"
+        [[ "$choice" == /* ]] || choice="$dir/$choice"
+        if [[ ! -f "$choice" ]]; then
+            echo "wallpaper: no such file: $choice" >&2
+            exit 1
+        fi
+        ;;
+esac
+
+if $print_only; then
+    echo "$choice"
+    exit 0
+fi
+
+case "$OSTYPE" in
+    darwin*)
+        osascript -e "tell application \"System Events\" to set picture of every desktop to POSIX file \"$choice\""
+        ;;
+    linux*)
+        feh --bg-scale "$choice"
+        ;;
+    *)
+        echo "wallpaper: unsupported OS: $OSTYPE" >&2
+        exit 1
+        ;;
+esac
+
+mkdir -p "$(dirname "$state")"
+printf '%s\n' "$choice" > "$state"
