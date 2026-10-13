@@ -105,7 +105,6 @@ done
 
 case "$OSTYPE" in
     darwin*)
-        link .aerospace.toml "$HOME/.aerospace.toml"
         link yabai           "$CONFIG/yabai"
         link skhd            "$CONFIG/skhd"
         # wallpaper rotation on macOS is done in System Settings > Wallpaper

@@ -1,4 +1,4 @@
-# skhd config — ported from .aerospace.toml / i3.
+# skhd config — ported from i3.
 # Note: skhd hot-reloads this file on save; yabai needs alt+shift-c (below).
 # 0x29 is the keycode for semicolon (skhd has no named key for it).
 
