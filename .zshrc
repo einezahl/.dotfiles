@@ -24,6 +24,15 @@ autoload -Uz compinit && compinit
 # vi-style command-line editing
 bindkey -v
 
+# Ctrl-F runs the tmux sessionizer (the same script as tmux's prefix + f).
+tmux-sessionizer-widget() {
+  BUFFER="$HOME/.dotfiles/scripts/tmux_sessionizer.sh"
+  zle accept-line
+}
+zle -N tmux-sessionizer-widget
+bindkey -M viins '^F' tmux-sessionizer-widget
+bindkey -M vicmd '^F' tmux-sessionizer-widget
+
 export NVM_DIR="$HOME/.nvm"
 [ -s "/usr/local/opt/nvm/nvm.sh" ] && . "/usr/local/opt/nvm/nvm.sh"
 
@@ -39,7 +48,14 @@ alias ssh="TERM=xterm-256color ssh"
 
 eval "$(zoxide init zsh)"
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# fzf key bindings (Ctrl-R history, Ctrl-T files). A git-installed fzf writes
+# ~/.fzf.zsh; the apt package only ships the scripts under /usr/share/doc.
+if [ -f ~/.fzf.zsh ]; then
+  source ~/.fzf.zsh
+elif [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]; then
+  source /usr/share/doc/fzf/examples/key-bindings.zsh
+  source /usr/share/doc/fzf/examples/completion.zsh
+fi
 
 export TERM=xterm-256color
 export EDITOR=nvim
@@ -53,9 +69,20 @@ export PATH="$PATH:/usr/local/go/bin:$HOME/go/bin"
 # opencode CLI
 export PATH="$HOME/.opencode/bin:$PATH"
 
+# MTEX installation
+export MTEX_PATH="$HOME/tools/mtex-7.1.0/"
+
 # Homebrew/Linuxbrew — guarded so machines without it don't error every shell.
 [ -x /home/linuxbrew/.linuxbrew/bin/brew ] && \
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
+
+# Node via fnm — the apt Node is too old for npm-based tools like Mason's
+# language servers. After Homebrew so fnm's Node wins. Guarded for machines
+# without fnm.
+if [ -x "$HOME/.local/share/fnm/fnm" ]; then
+  export PATH="$HOME/.local/share/fnm:$PATH"
+  eval "$(fnm env --use-on-cd --shell zsh)"
+fi
 
 # Powerlevel10k theme (cloned into ~/.dotfiles/zsh/ by install.sh — gitignored,
 # so a fresh machine that skipped install.sh won't have it). Warn loudly rather

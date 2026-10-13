@@ -22,6 +22,7 @@ crossnote/
 i3/machine/current.conf
 rofi/machine.rasi
 polybar/cuts/machine.ini
+kitty/machine.conf
 
 # Vendored zsh plugins/themes (cloned by install.sh)
 zsh/powerlevel10k/

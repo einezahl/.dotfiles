@@ -1,6 +1,5 @@
 sudo apt update
 sudo apt install i3
-sudo apt install tmux -y
 sudo apt install zsh -y
 
 sudo apt install dunst
@@ -45,17 +44,45 @@ if needs_install neovim "$nvim_current" "$nvim_latest"; then
     sudo mv nvim-linux-x86_64.appimage /usr/local/bin/nvim
 fi
 
+# tmux: needs >=3.3 for `allow-passthrough`, which lets kitty's graphics
+# protocol survive tmux (used by image.nvim). Apt ships 3.2a, so build the
+# latest release from the official source tarball (tmux ships no prebuilt
+# binary). Installs to /usr/local/bin, shadowing apt's tmux.
+tmux_latest=$(curl -s https://api.github.com/repos/tmux/tmux/releases/latest \
+    | grep -oE '"tag_name": *"[^"]+"' | grep -oE '[0-9]+\.[0-9]+[a-z]?')
+tmux_current=$(tmux -V 2>/dev/null | grep -oE '[0-9]+\.[0-9]+[a-z]?')
+if needs_install tmux "$tmux_current" "$tmux_latest"; then
+    sudo apt install -y libevent-dev libncurses-dev bison
+    curl -L -o /tmp/tmux.tar.gz "https://github.com/tmux/tmux/releases/download/${tmux_latest}/tmux-${tmux_latest}.tar.gz"
+    tar xf /tmp/tmux.tar.gz -C /tmp
+    (cd "/tmp/tmux-${tmux_latest}" && ./configure && make && sudo make install)
+    rm -rf /tmp/tmux.tar.gz "/tmp/tmux-${tmux_latest}"
+fi
+
 # tree-sitter CLI: required by nvim-treesitter's 'main' branch, which compiles
 # every parser with `tree-sitter build`. Must be the package-manager/standalone
 # binary, NOT the npm package. Installed to ~/.local/bin (no sudo).
+#
+# The prebuilt binaries link against the glibc of their CI runner. Releases
+# built on Ubuntu 24.04 need glibc 2.39, which Ubuntu 22.04 (glibc 2.35) lacks,
+# so the binary fails with "GLIBC_2.39 not found". After installing the latest,
+# verify it actually runs and fall back to the newest known glibc-2.34 build.
+ts_fallback=0.25.10
 ts_latest=$(curl -s https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest \
     | grep -oE '"tag_name": *"v?[^"]+"' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
 ts_current=$(tree-sitter --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-if needs_install tree-sitter "$ts_current" "$ts_latest"; then
-    mkdir -p "$HOME/.local/bin"
-    curl -L "https://github.com/tree-sitter/tree-sitter/releases/download/v${ts_latest}/tree-sitter-linux-x64.gz" \
+install_tree_sitter() {
+    curl -L "https://github.com/tree-sitter/tree-sitter/releases/download/v${1}/tree-sitter-linux-x64.gz" \
         | gunzip > "$HOME/.local/bin/tree-sitter"
     chmod +x "$HOME/.local/bin/tree-sitter"
+}
+if needs_install tree-sitter "$ts_current" "$ts_latest"; then
+    mkdir -p "$HOME/.local/bin"
+    install_tree_sitter "$ts_latest"
+    if ! "$HOME/.local/bin/tree-sitter" --version >/dev/null 2>&1; then
+        echo "tree-sitter $ts_latest won't run (glibc too old); falling back to $ts_fallback"
+        install_tree_sitter "$ts_fallback"
+    fi
 fi
 
 sudo apt install pipx
@@ -79,6 +106,18 @@ if needs_install bw "$bw_current" "$BW_VER"; then
     chmod +x /tmp/bw
     sudo mv /tmp/bw /usr/local/bin/bw
     rm /tmp/bw.zip
+fi
+
+# fzf: yazi's `z` (zoxide) and `Z` pickers pass options that apt's fzf 0.29
+# rejects (e.g. --scrollbar), so the picker exits instantly. Install the latest
+# static binary to ~/.local/bin (no sudo), which shadows /usr/bin/fzf on PATH.
+fzf_latest=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest \
+    | grep -oE '"tag_name": *"v?[^"]+"' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+fzf_current=$(fzf --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1)
+if needs_install fzf "$fzf_current" "$fzf_latest"; then
+    mkdir -p "$HOME/.local/bin"
+    curl -L "https://github.com/junegunn/fzf/releases/download/v${fzf_latest}/fzf-${fzf_latest}-linux_amd64.tar.gz" \
+        | tar xz -C "$HOME/.local/bin" fzf
 fi
 
 # yazi: terminal file manager. Apt ships a stale version; grab the latest

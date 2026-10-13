@@ -1,0 +1,18 @@
+# Custom openers — bypass xdg-open guessing for known file types.
+
+[opener]
+edit = [
+  { run = '$EDITOR "$@"', desc = "Edit in $EDITOR", block = true },
+]
+pdf = [
+  { run = 'evince "$@"', desc = "Open in Evince", orphan = true },
+]
+image = [
+  { run = 'eog "$@"', desc = "Open in Eye of GNOME", orphan = true },
+]
+
+[open]
+prepend_rules = [
+  { mime = "application/pdf", use = "pdf" },
+  { mime = "image/*", use = "image" },
+]

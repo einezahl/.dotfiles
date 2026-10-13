@@ -183,10 +183,24 @@ return { -- LSP Configuration & Plugins
           basedpyright = {
             analysis = {
               autoSearchPaths = true,
+              autoImportCompletions = false,
               diagnosticMode = 'openFilesOnly',
               useLibraryCodeForTypes = true,
               typeCheckingMode = 'basic',
             },
+          },
+        },
+      },
+      matlab_ls = {
+        -- The default only starts inside a git repo; this also covers loose .m files.
+        single_file_support = true,
+        settings = {
+          MATLAB = {
+            -- MATLAB root derived from the `matlab` on PATH (…/R20xx/bin/matlab → …/R20xx),
+            -- since the installed release differs per machine.
+            installPath = vim.fn.fnamemodify(vim.fn.resolve(vim.fn.exepath 'matlab'), ':h:h'),
+            indexWorkspace = true,
+            telemetry = false,
           },
         },
       },
@@ -313,9 +327,7 @@ return { -- LSP Configuration & Plugins
     local ensure_installed = vim.tbl_keys(servers or {})
     vim.list_extend(ensure_installed, {
       'stylua', -- Used to format Lua code
-      'black', -- Used to format python code
       'ast-grep',
-      'black',
       'basedpyright',
       -- 'pylsp',
       'lua-language-server',

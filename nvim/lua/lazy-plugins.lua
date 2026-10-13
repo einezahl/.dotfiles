@@ -27,7 +27,7 @@ require('lazy').setup({
   require 'plugins.custom.undotree',
   require 'plugins.custom.rosepine',
   require 'plugins.custom.lsp_signature',
-  -- require 'plugins.custom.nvim_lint',
+  require 'plugins.custom.nvim_lint',
   -- require 'plugins.custom.feline',
   require 'plugins.custom.friendly-snipptes',
   require 'plugins.custom.luasnip',
