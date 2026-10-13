@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Download the wallpapers listed in wallpapers.txt into the wallpaper folder.
+# The images themselves are not kept in this repo, only where they come from.
+#
+#   wallpaper-fetch          download what is missing
+#   wallpaper-fetch --force  download everything again
+#
+# wallpapers.txt, one image per line:
+#   <url> [local name]
+# Lines starting with # and blank lines are ignored. Without a local name the
+# last part of the URL is used. For GitHub use the raw URL of the file, e.g.
+#   https://raw.githubusercontent.com/<user>/<repo>/<branch>/<path>/<file>.png
+# Folder: $WALLPAPER_DIR, else ~/Pictures/Wallpaper (same rule as `wallpaper`).
+
+set -euo pipefail
+
+list="${WALLPAPER_LIST:-$HOME/.dotfiles/wallpapers.txt}"
+dir="${WALLPAPER_DIR:-$HOME/Pictures/Wallpaper}"
+force=false
+[[ "${1:-}" == "--force" ]] && force=true
+
+if [[ ! -f "$list" ]]; then
+    echo "wallpaper-fetch: list not found: $list" >&2
+    exit 1
+fi
+mkdir -p "$dir"
+
+fetched=0
+skipped=0
+failed=0
+while read -r url name _; do
+    [[ -z "$url" || "$url" == \#* ]] && continue
+    name="${name:-${url##*/}}"
+    target="$dir/$name"
+    if [[ -f "$target" ]] && ! $force; then
+        skipped=$((skipped + 1))
+        continue
+    fi
+    echo "fetching $name"
+    if curl -fsSL --retry 3 -o "$target.part" "$url"; then
+        mv "$target.part" "$target"
+        fetched=$((fetched + 1))
+    else
+        rm -f "$target.part"
+        echo "wallpaper-fetch: failed: $url" >&2
+        failed=$((failed + 1))
+    fi
+done < "$list"
+
+echo "fetched $fetched, already present $skipped, failed $failed"
+[[ $failed -eq 0 ]]
