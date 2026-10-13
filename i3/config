@@ -45,6 +45,13 @@ assign [class="(?i)obsidian"] → number 9
 assign [instance="tmux-sessionizer"] → number 1
 assign [instance="thesis-tmux"]      → number 2
 
+# yazi scratchpad: a floating file manager shared by every workspace, toggled
+# with $mod+m instead of navigated to. It runs outside tmux so kitty's image
+# previews work. The loop restarts yazi after `q` so the window never closes.
+for_window [instance="yazi-scratch"] floating enable, resize set 80 ppt 80 ppt, move position center, move scratchpad
+exec --no-startup-id kitty --name yazi-scratch zsh -c 'while true; do yazi; done'
+bindsym $mod+m [instance="yazi-scratch"] scratchpad show
+
 # launch desktop apps (incl. the thesis workspace); the assign rules above route them to the right workspace
 exec --no-startup-id $HOME/.dotfiles/scripts/i3_autostart.sh
 # exec --no-startup-id i3-layouts
