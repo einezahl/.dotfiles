@@ -1,0 +1,12 @@
+# Wallpapers to download with scripts/wallpaper-fetch, one per line:
+#   <url> [local name]
+# The images stay in their original repositories; this file only records
+# where each one comes from. Use raw URLs for GitHub files.
+#
+# Currently in ~/Pictures/Wallpaper, sources still to be filled in:
+# https://raw.githubusercontent.com/<user>/<repo>/<branch>/<path>/a_drawing_of_a_wolf_and_a_lion.png
+# https://raw.githubusercontent.com/<user>/<repo>/<branch>/<path>/a_house_with_a_chair_and_a_bicycle.jpg
+# https://raw.githubusercontent.com/<user>/<repo>/<branch>/<path>/a_mountain_range_at_night.png
+# https://raw.githubusercontent.com/<user>/<repo>/<branch>/<path>/a_video_game_screen_capture.jpg
+# https://raw.githubusercontent.com/<user>/<repo>/<branch>/<path>/astronaut.png
+# https://raw.githubusercontent.com/<user>/<repo>/<branch>/<path>/cherry-blossoms.png

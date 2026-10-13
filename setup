@@ -85,6 +85,9 @@ for s in "$DOTFILES"/scripts/*; do
     link "scripts/$(basename "$s")" "$HOME/.local/bin/$(basename "$s")"
 done
 
+# wallpapers are not in the repo, only their sources (wallpapers.txt)
+"$DOTFILES/scripts/wallpaper-fetch" || echo "some wallpapers could not be fetched, rerun wallpaper-fetch later"
+
 case "$OSTYPE" in
     darwin*)
         link .aerospace.toml "$HOME/.aerospace.toml"
