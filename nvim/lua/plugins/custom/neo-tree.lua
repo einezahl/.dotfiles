@@ -11,8 +11,54 @@ return {
   },
   cmd = 'Neotree',
   keys = {
-    { '\\', ':Neotree toggle<CR>', { desc = 'NeoTree toggle' } },
+    {
+      '\\',
+      function()
+        -- `reveal` mangles non-file buffers such as oil:// URLs into bogus
+        -- paths, so only reveal when the current buffer is an on-disk file.
+        local name = vim.api.nvim_buf_get_name(0)
+        if vim.bo.buftype == '' and name ~= '' and vim.fn.filereadable(name) == 1 then
+          vim.cmd 'Neotree reveal toggle'
+        else
+          vim.cmd 'Neotree toggle'
+        end
+      end,
+      desc = 'NeoTree toggle (reveal current file)',
+    },
   },
+  init = function()
+    -- `nvim <dir>` and plain `nvim`: focused Neo-tree sidebar next to an empty
+    -- window. `nvim <file>`: just the file, no sidebar.
+    vim.api.nvim_create_autocmd('VimEnter', {
+      desc = 'Open a focused Neo-tree sidebar when Neovim starts on a directory',
+      callback = function()
+        local dir = nil
+        if vim.fn.argc() == 1 then
+          if vim.bo.filetype == 'oil' then
+            -- oil.nvim has already turned the directory buffer into an oil
+            -- listing and rewritten argv to its oil:// URL.
+            dir = require('oil').get_current_dir()
+          elseif vim.fn.isdirectory(vim.fn.argv(0)) == 1 then
+            dir = vim.fn.fnamemodify(vim.fn.argv(0), ':p')
+          end
+        end
+        -- line2byte('$') == -1 means the buffer is empty, so text piped in via `nvim -` still counts as a file.
+        local opened_nothing = vim.fn.argc() == 0 and vim.fn.line2byte '$' == -1
+        if not (dir or opened_nothing) then
+          return
+        end
+
+        if dir then
+          -- Swap the directory listing for an empty buffer so the right side stays blank.
+          local dir_buf = vim.api.nvim_get_current_buf()
+          vim.cmd.cd(vim.fn.fnameescape(dir))
+          vim.cmd.enew()
+          pcall(vim.api.nvim_buf_delete, dir_buf, { force = true })
+        end
+        vim.cmd 'Neotree focus'
+      end,
+    })
+  end,
   opts = {
     event_handlers = {
       {
@@ -119,7 +165,7 @@ return {
     commands = {},
     window = {
       position = 'left',
-      width = 30,
+      width = 50,
       mapping_options = {
         noremap = true,
         nowait = true,
@@ -279,7 +325,7 @@ return {
     },
     git_status = {
       window = {
-        position = 'left',
+        position = 'float',
         mappings = {
           ['A'] = 'git_add_all',
           ['gu'] = 'git_unstage_file',

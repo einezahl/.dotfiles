@@ -5,6 +5,14 @@
 #   machine/shell.zsh      this machine only (machine -> machines/<name>, set by ./setup)
 #   ~/.config/localenv/*   untracked secrets and overrides, last so they win
 
+# SSH keys via keychain on Linux. Must run before the powerlevel10k instant
+# prompt below, which swallows the console input keychain needs for
+# passphrase prompts. See scripts/ssh_keychain.sh for the details. macOS
+# keeps SSH passphrases in its own keychain, so it needs nothing here.
+if [[ "$OSTYPE" == linux* ]]; then
+    source "$HOME/.dotfiles/scripts/ssh_keychain.sh"
+fi
+
 # powerlevel10k instant prompt, must stay close to the top. Anything that
 # needs console input (password prompts, [y/n] questions) goes below it.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
@@ -13,8 +21,12 @@ fi
 
 export DOTFILES="$HOME/.dotfiles"
 
-# Tools that honor XDG read their config straight from this repo
-export XDG_CONFIG_HOME="$DOTFILES"
+# On macOS, tools that honor XDG read their config straight from this repo.
+# The i3 machines keep ~/.config: there the configs are reached through the
+# symlinks ./setup creates, and other tools' state stays out of the repo.
+if [[ "$OSTYPE" == darwin* ]]; then
+    export XDG_CONFIG_HOME="$DOTFILES"
+fi
 
 # Name of this machine, taken from the gitignored `machine` symlink
 if [[ -L "$DOTFILES/machine" ]]; then
@@ -34,13 +46,21 @@ esac
 [[ -d ~/.zfunc ]] && fpath+=~/.zfunc
 autoload -Uz compinit && compinit
 
-eval "$(zoxide init zsh)"
-[[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+# fzf key bindings (Ctrl-R history, Ctrl-T files). A git-installed fzf writes
+# ~/.fzf.zsh; the apt package only ships the scripts under /usr/share/doc.
+if [[ -f ~/.fzf.zsh ]]; then
+    source ~/.fzf.zsh
+elif [[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]]; then
+    source /usr/share/doc/fzf/examples/key-bindings.zsh
+    source /usr/share/doc/fzf/examples/completion.zsh
+fi
 
 # powerlevel10k: first match wins. Install with one of
 #   brew install powerlevel10k                                   (macOS)
 #   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
+#   ./install.sh                         (Ubuntu, clones into $DOTFILES/zsh/)
 for p10k in \
+    "$DOTFILES/zsh/powerlevel10k/powerlevel10k.zsh-theme" \
     /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme \
     /usr/local/share/powerlevel10k/powerlevel10k.zsh-theme \
     /usr/share/powerlevel10k/powerlevel10k.zsh-theme \
@@ -71,3 +91,7 @@ if [[ -d "$LOCALENV" ]]; then
         source "$i"
     done
 fi
+
+# zoxide must be initialized last, after everything that could redefine cd
+# (`zoxide doctor` warns otherwise).
+eval "$(zoxide init zsh)"

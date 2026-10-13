@@ -90,13 +90,12 @@ require 'config.autocmds'
 
 require 'config.keymaps'
 
-require 'config.config'
-
 require 'lazy-bootstrap'
 
 require 'lazy-plugins'
 
-vim.api.nvim_set_keymap('n', '<leader>~', ':lua require("chat").run_curl()<CR>', { noremap = true, silent = true })
+require 'config.config'
 
+-- require 'plugins.custom.iris'
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

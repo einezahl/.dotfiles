@@ -4,6 +4,7 @@ lazyvim.json
 **.log
 
 # tool state that lands here because XDG_CONFIG_HOME points at this repo
+# (macOS), or did in older bash-based setups (Ubuntu)
 configstore/
 lazygit/
 glow/
@@ -13,8 +14,12 @@ github-copilot/
 mimeapps.list
 .android/
 Android Open Source Project/
+BraveSoftware/
 eas-cli-nodejs/
 Google/
+mlflow/
+pulse/
+Ultralytics/
 other_configurations/
 
 # old nvim configs
@@ -24,9 +29,13 @@ nvim_chad/
 # chosen by ./setup <machine>, points at machines/<name>
 /machine
 
+# Vendored zsh plugins/themes (cloned by install.sh)
+zsh/powerlevel10k/
+
 # more incidental tool state
 homebrew/
 swiftpm/
 uv/
 opencode/node_modules/
 .claude/settings.local.json
+.claude/**.local.json

@@ -95,7 +95,7 @@ return { -- LSP Configuration & Plugins
 
         -- Opens a popup that displays documentation about the word under your cursor
         --  See `:help K` for why this keymap.
-        map('S', vim.lsp.buf.hover, 'Hover Documentation')
+        map('<leader>s', vim.lsp.buf.hover, 'Hover Documentation')
 
         -- WARN: This is not Goto Definition, this is Goto Declaration.
         --  For example, in C this would take you to the header.
@@ -142,6 +142,20 @@ return { -- LSP Configuration & Plugins
       end,
     })
 
+    -- Drop pushed diagnostics for buffers that aren't loaded. Neovim 0.12.2's
+    -- vim.diagnostic.set() registers a fresh one-shot BufRead autocmd (holding the
+    -- diagnostics) for every update to an unloaded buffer and never replaces it
+    -- (once_buf_loaded in vim/diagnostic.lua). texlab publishes project-wide, which
+    -- piled up ~80k such autocmds and several GB within an hour in the thesis.
+    local publish_diagnostics = vim.lsp.handlers['textDocument/publishDiagnostics']
+    vim.lsp.handlers['textDocument/publishDiagnostics'] = function(err, result, ctx, config)
+      local bufnr = vim.fn.bufnr(vim.uri_to_fname(result.uri))
+      if bufnr == -1 or not vim.api.nvim_buf_is_loaded(bufnr) then
+        return
+      end
+      return publish_diagnostics(err, result, ctx, config)
+    end
+
     -- LSP servers and clients are able to communicate to each other what features they support.
     --  By default, Neovim doesn't support everything that is in the LSP specification.
     --  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
@@ -161,20 +175,64 @@ return { -- LSP Configuration & Plugins
     local servers = {
       -- clangd = {},
       -- gopls = {},
-      -- pyright = {},
       basedpyright = {
+        before_init = function(_, config)
+          config.settings.python = { pythonPath = vim.fn.exepath 'python' }
+        end,
         settings = {
           basedpyright = {
             analysis = {
               autoSearchPaths = true,
+              autoImportCompletions = false,
               diagnosticMode = 'openFilesOnly',
               useLibraryCodeForTypes = true,
-              reportMissingTypeStubs = false,
               typeCheckingMode = 'basic',
             },
           },
         },
       },
+      matlab_ls = {
+        -- The default only starts inside a git repo; this also covers loose .m files.
+        single_file_support = true,
+        settings = {
+          MATLAB = {
+            -- MATLAB root derived from the `matlab` on PATH (…/R20xx/bin/matlab → …/R20xx),
+            -- since the installed release differs per machine.
+            installPath = vim.fn.fnamemodify(vim.fn.resolve(vim.fn.exepath 'matlab'), ':h:h'),
+            indexWorkspace = true,
+            telemetry = false,
+          },
+        },
+      },
+      -- pylsp = {
+      --   settings = {
+      --     pylsp = {
+      --       plugins = {
+      --         jedi = {
+      --           environment = vim.fn.exepath 'python',
+      --         },
+      --         pylint = {
+      --           enabled = true,
+      --           executable = vim.fn.exepath 'pylint',
+      --         },
+      --       },
+      --     },
+      --   },
+      -- },
+      -- pylsp = {},
+      -- basedpyright = {
+      --   settings = {
+      --     basedpyright = {
+      --       analysis = {
+      --         autoSearchPaths = true,
+      --         diagnosticMode = 'openFilesOnly',
+      --         useLibraryCodeForTypes = true,
+      --         reportMissingTypeStubs = false,
+      --         typeCheckingMode = 'basic',
+      --       },
+      --     },
+      --   },
+      -- },
       -- sqlls = {},
       -- rust_analyzer = {},
       -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -269,10 +327,9 @@ return { -- LSP Configuration & Plugins
     local ensure_installed = vim.tbl_keys(servers or {})
     vim.list_extend(ensure_installed, {
       'stylua', -- Used to format Lua code
-      'black', -- Used to format python code
       'ast-grep',
-      'black',
       'basedpyright',
+      -- 'pylsp',
       'lua-language-server',
       'debugpy',
       'sql-formatter',

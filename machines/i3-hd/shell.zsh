@@ -1,4 +1,4 @@
-# Shell settings that only apply to the i3 laptop.
+# Shell settings that only apply to the HD (1080p) i3 machine.
 
 # VPN helpers for this machine, for example:
 # alias vpn-up="nmcli connection up <connection-name>"

@@ -51,6 +51,19 @@ return { -- Autocompletion
     local select_opts = { behavior = cmp.SelectBehavior.Select }
 
     luasnip.config.setup {}
+    require('luasnip.loaders.from_lua').lazy_load { paths = { vim.fn.stdpath 'config' .. '/snippets' } }
+
+    -- Insert/select mode only, so the normal-mode window/tmux navigation on these keys is untouched.
+    vim.keymap.set({ 'i', 's' }, '<C-l>', function()
+      if luasnip.expand_or_locally_jumpable() then
+        luasnip.expand_or_jump()
+      end
+    end, { desc = 'Snippet: expand or jump to next field' })
+    vim.keymap.set({ 'i', 's' }, '<C-h>', function()
+      if luasnip.locally_jumpable(-1) then
+        luasnip.jump(-1)
+      end
+    end, { desc = 'Snippet: jump to previous field' })
 
     cmp.setup {
       snippet = {
@@ -87,8 +100,8 @@ return { -- Autocompletion
         end, { 'i', 's' }),
 
         -- Scroll the documentation window [b]ack / [f]orward
-        -- ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-        -- ['<C-f>'] = cmp.mapping.scroll_docs(4),
+        ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+        ['<C-f>'] = cmp.mapping.scroll_docs(4),
 
         -- Accept ([y]es) the completion.
         --  This will auto-import if your LSP supports it.
@@ -97,20 +110,17 @@ return { -- Autocompletion
 
         -- If you prefer more traditional completion keymaps,
         -- you can uncomment the following lines
-        ['<CR>'] = cmp.mapping(function(fallback)
-          if cmp.visible() then
-            fallback() -- This makes Enter behave as fallback, not selecting the item
-          else
-            fallback() -- Makes Enter insert a newline when the completion menu is not visible
-          end
-        end, { "i", "s" }),
+        -- ['<CR>'] = cmp.mapping.confirm { select = false },
         ['<Tab>'] = cmp.mapping.confirm { select = true },
         --['<Tab>'] = cmp.mapping.select_next_item(),
         --['<S-Tab>'] = cmp.mapping.select_prev_item(),
         -- Manually trigger a completion from nvim-cmp.
         --  Generally you don't need this, because nvim-cmp will display
         --  completions whenever it has completion options available.
-        ['<C-Space>'] = cmp.mapping.complete {},
+        -- LSP results are kept out of the automatic menu and only shown on demand here.
+        ['<C-Space>'] = cmp.mapping.complete {
+          config = { sources = { { name = 'nvim_lsp' } } },
+        },
 
         -- Think of <c-l> as moving to the right of your snippet expansion.
         --  So if you have a snippet that's like:
@@ -120,25 +130,24 @@ return { -- Autocompletion
         --
         -- <c-l> will move you to the right of each of the expansion locations.
         -- <c-h> is similar, except moving you backwards.
-        ['<C-f>'] = cmp.mapping(function()
-          if luasnip.expand_or_locally_jumpable() then
-            luasnip.expand_or_jump()
-          end
-        end, { 'i', 's' }),
-        ['<C-b>'] = cmp.mapping(function()
-          if luasnip.locally_jumpable(-1) then
-            luasnip.jump(-1)
-          end
-        end, { 'i', 's' }),
+        -- ['<C-f>'] = cmp.mapping(function()
+        --   if luasnip.expand_or_locally_jumpable() then
+        --     luasnip.expand_or_jump()
+        --   end
+        -- end, { 'i', 's' }),
+        -- ['<C-b>'] = cmp.mapping(function()
+        --   if luasnip.locally_jumpable(-1) then
+        --     luasnip.jump(-1)
+        --   end
+        -- end, { 'i', 's' }),
 
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
       },
       sources = {
-        { name = 'path' },
-        { name = 'nvim_lsp', keyword_length = 1 },
-        { name = 'buffer', keyword_length = 3 },
         { name = 'luasnip', keyword_length = 2 },
+        { name = 'path' },
+        { name = 'buffer', keyword_length = 3 },
       },
     }
   end,

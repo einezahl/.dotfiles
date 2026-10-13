@@ -6,7 +6,7 @@
 # machine is a directory name under machines/. Without an argument the
 # previously chosen machine is kept, otherwise a menu is shown. The choice
 # is stored as the gitignored symlink `machine -> machines/<name>`, which
-# .bashrc, i3, polybar, alacritty and kitty include from.
+# .zshrc, i3, polybar, rofi, alacritty and kitty include from.
 #
 # Existing files at a link target are moved to ~/.config/old_config/<timestamp>/.
 
@@ -38,6 +38,13 @@ machine="${1:-}"
 if [ -z "$machine" ] && [ -L "$DOTFILES/machine" ]; then
     machine="$(basename "$(readlink "$DOTFILES/machine")")"
 fi
+# The i3 machines used to record 4k/hd in a .machine file; carry that over once.
+if [ -z "$machine" ] && [ -f "$DOTFILES/.machine" ]; then
+    case "$(tr -d '[:space:]' < "$DOTFILES/.machine")" in
+        4k) machine=i3-4k ;;
+        hd) machine=i3-hd ;;
+    esac
+fi
 if [ -z "$machine" ]; then
     machine="$(choose_machine)"
 fi
@@ -48,6 +55,15 @@ fi
 
 ln -sfn "machines/$machine" "$DOTFILES/machine"
 echo "machine: $machine"
+
+# the .machine flag and the per-tool links it selected are replaced by `machine`
+for f in .machine i3/machine/current.conf rofi/machine.rasi polybar/cuts/machine.ini kitty/machine.conf; do
+    if [ -e "$DOTFILES/$f" ] || [ -L "$DOTFILES/$f" ]; then
+        rm "$DOTFILES/$f"
+        echo "removed old machine flag $f"
+    fi
+done
+rmdir "$DOTFILES/i3/machine" 2>/dev/null || true
 
 # --- linking -----------------------------------------------------------------
 
@@ -81,6 +97,8 @@ link alacritty.toml           "$CONFIG/alacritty/alacritty.toml"
 link kitty                    "$CONFIG/kitty"
 link nvim                     "$CONFIG/nvim"
 link yazi                     "$CONFIG/yazi"
+link claude/CLAUDE.md         "$HOME/.claude/CLAUDE.md"
+link claude/ml-projects.md    "$HOME/.claude/ml-projects.md"
 for s in "$DOTFILES"/scripts/*; do
     link "scripts/$(basename "$s")" "$HOME/.local/bin/$(basename "$s")"
 done
@@ -94,9 +112,26 @@ case "$OSTYPE" in
         # (add the folder, "change picture" hourly); scripts/wallpaper is for i3
         ;;
     linux*)
-        for d in i3 polybar rofi dunst picom; do
+        for d in i3 polybar rofi dunst picom zathura; do
             link "$d" "$CONFIG/$d"
         done
+
+        # Shadow the snap's Obsidian desktop entry (same file name, higher XDG
+        # precedence) so rofi and obsidian:// links go through the scaling
+        # wrapper. Written rather than linked because Exec needs an absolute path.
+        mkdir -p "$HOME/.local/share/applications"
+        cat > "$HOME/.local/share/applications/obsidian_obsidian.desktop" <<EOF
+[Desktop Entry]
+Name=Obsidian
+Exec=$DOTFILES/scripts/obsidian.sh %U
+Terminal=false
+Type=Application
+Icon=/snap/obsidian/current/meta/gui/obsidian.png
+StartupWMClass=md.obsidian.Obsidian
+Comment=Obsidian
+MimeType=x-scheme-handler/obsidian;
+Categories=Office;
+EOF
 
         # hourly wallpaper change: systemd user timer
         if command -v systemctl >/dev/null 2>&1; then

@@ -7,7 +7,6 @@
 --
 --  To update plugins you can run
 --    :Lazy update
---
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
 
@@ -20,18 +19,22 @@ require('lazy').setup({
   --
   -- custom plugins
   require 'plugins.custom.oil',
+  -- require 'plugins.custom.lsp-status',
   require 'plugins.custom.harpoon',
+  require 'plugins.custom.vimbegood',
   require 'plugins.custom.vim-tmux-navigator',
   require 'plugins.custom.nvim-lightbulb',
   require 'plugins.custom.undotree',
   require 'plugins.custom.rosepine',
   require 'plugins.custom.lsp_signature',
-  require 'plugins.custom.feline',
-  require 'plugins.custom.obsidian',
-  -- require 'plugins.custom.image',
+  require 'plugins.custom.nvim_lint',
+  -- require 'plugins.custom.feline',
+  require 'plugins.custom.friendly-snipptes',
+  require 'plugins.custom.luasnip',
   -- require 'plugins.custom.molten-nvim',
   -- require 'plugins.custom.lazygit',
   require 'plugins.custom.neo-tree',
+  require 'plugins.custom.image',
   -- require 'plugins.custom.toggleterm',
 
   -- Kickstart standard plugins
@@ -50,21 +53,29 @@ require('lazy').setup({
   -- require 'plugins.kickstart.lint',
 
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  {
+    'MeanderingProgrammer/render-markdown.nvim',
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
+    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.icons' }, -- if you use standalone mini plugins
+    -- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+    ---@module 'render-markdown'
+    ---@type render.md.UserConfig
+    opts = {},
+  },
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
-  -- Lua
   {
     'folke/zen-mode.nvim',
     opts = {
       window = {
-        backdrop = 0.95, -- shade the backdrop of the Zen window. Set to 1 to keep the same as Normal
+        backdrop = 1, -- shade the backdrop of the Zen window. Set to 1 to keep the same as Normal
         -- height and width can be:
         -- * an absolute number of cells when > 1
         -- * a percentage of the width / height of the editor when <= 1
         -- * a function that returns the width or the height
-        width = 0.70, -- width of the Zen window
+        width = 0.60, -- width of the Zen window
         height = 1, -- height of the Zen window
         -- by default, no options are changed for the Zen window
         -- uncomment any of the options below, or add other vim.wo options you want to apply

@@ -5,3 +5,6 @@ import = ["~/.dotfiles/machine/alacritty.toml"]
 
 [font.normal]
 family = "UbuntuMono Nerd Font"
+
+[window]
+opacity = 0.9

@@ -1,0 +1,16 @@
+# Image inspection under the `i` prefix (unbound in yazi's defaults).
+
+[[mgr.prepend_keymap]]
+on = ["i", "i"]
+run = "shell --block -- ~/.dotfiles/scripts/image_info.py %h | less -RS"
+desc = "Image info (hovered image or directory)"
+
+[[mgr.prepend_keymap]]
+on = ["i", "d"]
+run = "shell --block -- ~/.dotfiles/scripts/image_info.py . | less -RS"
+desc = "Image overview of the current directory"
+
+[[mgr.prepend_keymap]]
+on = ["i", "p"]
+run = "shell --block -- ~/.dotfiles/scripts/image_shell.py %h"
+desc = "IPython with hovered image loaded as img"

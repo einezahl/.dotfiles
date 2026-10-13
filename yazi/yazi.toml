@@ -2,3 +2,25 @@
 show_hidden = false
 sort_by = "natural"
 sort_dir_first = true
+
+# Custom openers — bypass xdg-open guessing for known file types. Each opener
+# has a Linux and a macOS entry; yazi picks the one whose `for` matches.
+
+[opener]
+edit = [
+  { run = '$EDITOR "$@"', desc = "Edit in $EDITOR", block = true },
+]
+pdf = [
+  { run = 'evince "$@"', desc = "Open in Evince", orphan = true, for = "linux" },
+  { run = 'open "$@"', desc = "Open", orphan = true, for = "macos" },
+]
+image = [
+  { run = 'eog "$@"', desc = "Open in Eye of GNOME", orphan = true, for = "linux" },
+  { run = 'open "$@"', desc = "Open", orphan = true, for = "macos" },
+]
+
+[open]
+prepend_rules = [
+  { mime = "application/pdf", use = "pdf" },
+  { mime = "image/*", use = "image" },
+]

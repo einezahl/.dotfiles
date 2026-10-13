@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+
+# Load SSH keys before spawning any tmux window. This blocks for the passphrase
+# once, here in the launching terminal, so the per-window shells find the keys
+# already loaded and don't each prompt (which would swallow the send-keys
+# command that opens nvim/lazygit/claude). See scripts/ssh_keychain.sh.
+# macOS keeps SSH passphrases in its own keychain and needs none of this.
+if [[ $OSTYPE == linux* ]]; then
+    source "$HOME/.dotfiles/scripts/ssh_keychain.sh"
+fi
+
+# Per-machine project layout, so each machine can describe its own structure.
+# The file is sourced as bash and may override project_roots and
+# remote_projects; the defaults below apply when it is absent. The tracked
+# machines/<name>/sessionizer.sh is used first; an untracked
+# ~/.config/tmux-sessionizer/config.sh still works for layouts that should not
+# be in git.
+config_file="$HOME/.dotfiles/machine/sessionizer.sh"
+if [[ ! -f $config_file ]]; then
+    config_file="$HOME/.config/tmux-sessionizer/config.sh"
+fi
+
+# Format: "root|depth". Every directory exactly `depth` levels below `root` is a
+# project; depth 0 makes `root` itself a project. New projects are created under
+# the first root.
+project_roots=(
+    "$HOME/dev|3"
+    "$HOME/.dotfiles|0"
+)
+
+# Format: "name|remote_path|ssh_host".
+remote_projects=()
+
+if [[ -f $config_file ]]; then
+    source "$config_file"
+fi
+
+local_dirs=$(
+    for entry in "${project_roots[@]}"; do
+        root="${entry%|*}"
+        depth="${entry##*|}"
+        find "$root" -mindepth "$depth" -maxdepth "$depth" -type d 2>/dev/null
+    done
+)
+remote_names=$(printf '%s\n' "${remote_projects[@]}" | cut -d'|' -f1 | sed 's/^/[remote] /')
+
+if [[ $# -eq 1 ]]; then
+    selected=$1
+else
+    fzf_out=$(echo -e "$remote_names\n$local_dirs" | fzf --print-query)
+    fzf_status=$?
+    if [[ $fzf_status -eq 130 ]]; then
+        exit 0
+    fi
+    query=$(printf '%s\n' "$fzf_out" | head -n1)
+    selected=$(printf '%s\n' "$fzf_out" | tail -n +2)
+
+    if [[ -z $selected ]]; then
+        if [[ -z $query ]]; then
+            exit 0
+        fi
+        new_root="${project_roots[0]%|*}"
+        new_depth="${project_roots[0]##*|}"
+        IFS=/ read -ra query_parts <<< "$query"
+        if [[ $query == /* || $query == */ || $query == *//* || ${#query_parts[@]} -ne $new_depth ]]; then
+            echo "Cannot create '$query': expected $new_depth path segments below $new_root." >&2
+            exit 1
+        fi
+
+        new_path="$new_root/$query"
+        confirm=$(printf 'no\nyes\n' | fzf --prompt="Create $new_path? > ")
+        if [[ "$confirm" != "yes" ]]; then
+            exit 0
+        fi
+
+        project_type=$(printf 'python\nother\n' | fzf --prompt="Project type? > ")
+        if [[ -z $project_type ]]; then
+            exit 0
+        fi
+
+        mkdir -p "$new_path" || exit 1
+        if [[ "$project_type" == "python" ]]; then
+            (cd "$new_path" && uv init && uv sync) || exit 1
+        fi
+
+        selected="$new_path"
+    fi
+fi
+
+if [[ -z $selected ]]; then
+    exit 0
+fi
+
+is_remote=false
+remote_path="~/cluster/"
+ssh_host="hpc"
+
+if [[ $selected == "[remote] "* ]]; then
+    is_remote=true
+    remote_name="${selected#\[remote\] }"
+    for entry in "${remote_projects[@]}"; do
+        name=$(echo "$entry" | cut -d'|' -f1)
+        if [[ "$name" == "$remote_name" ]]; then
+            remote_path=$(echo "$entry" | cut -d'|' -f2)
+            ssh_host=$(echo "$entry" | cut -d'|' -f3)
+            break
+        fi
+    done
+    selected_name=$(echo "$remote_name" | tr . _)
+    local_mount="$HOME/cluster/$selected_name"
+else
+    selected_name=$(basename "$selected" | tr . _)
+fi
+
+create_session() {
+    if [[ $is_remote == true ]]; then
+        mkdir -p "$local_mount"
+        
+        remote_setup="cd $remote_path && source .venv/bin/activate && export PYTHONPATH=\$PYTHONPATH:$remote_path"
+        local_setup="source $local_mount/.venv/bin/activate && export PYTHONPATH=\$PYTHONPATH:$local_mount"
+        
+        tmux new-session -ds $selected_name
+        tmux rename-window -t $selected_name:1 'exec'
+        tmux send-keys -t $selected_name:exec "ssh -t $ssh_host '$remote_setup && exec \$SHELL -l'" C-m
+        
+        tmux new-window -t $selected_name -n 'edit' -c "$HOME"
+        tmux send-keys -t $selected_name:edit "mountpoint -q $local_mount || sshfs $ssh_host:$remote_path $local_mount -o reconnect,ServerAliveInterval=15 && cd $local_mount && $local_setup && nvim $local_mount" C-m
+        
+        tmux new-window -t $selected_name -n 'git' -c "$HOME"
+        tmux send-keys -t $selected_name:git "mountpoint -q $local_mount || sshfs $ssh_host:$remote_path $local_mount -o reconnect,ServerAliveInterval=15 && cd $local_mount && $local_setup && lazygit" C-m
+
+        tmux new-window -t $selected_name -n 'claude' -c "$HOME"
+        tmux send-keys -t $selected_name:claude "mountpoint -q $local_mount || sshfs $ssh_host:$remote_path $local_mount -o reconnect,ServerAliveInterval=15 && cd $local_mount && $local_setup && claude" C-m
+    else
+        setup_commands="source .venv/bin/activate; export PYTHONPATH=\$PYTHONPATH:$selected"
+        
+        tmux new-session -ds $selected_name -c $selected
+        tmux rename-window -t $selected_name:1 'exec'
+        tmux send-keys -t $selected_name:exec "$setup_commands; echo 'Hello'" C-m
+        
+        tmux new-window -t $selected_name -n 'edit' -c $selected
+        tmux send-keys -t $selected_name:edit "$setup_commands; nvim $selected" C-m
+        
+        tmux new-window -t $selected_name -n 'git' -c $selected
+        tmux send-keys -t $selected_name:git "$setup_commands; lazygit" C-m
+
+        tmux new-window -t $selected_name -n 'claude' -c $selected
+        tmux send-keys -t $selected_name:claude "$setup_commands; claude" C-m
+    fi
+    
+    tmux select-window -t $selected_name:edit
+}
+
+if ! tmux has-session -t="$selected_name" 2> /dev/null; then
+    create_session
+fi
+
+# switch-client only works from inside a tmux client. A terminal launched
+# outside tmux (e.g. the i3 autostart) must attach instead — otherwise the
+# command exits immediately and takes the terminal window down with it.
+if [[ -n $TMUX ]]; then
+    tmux switch-client -t "$selected_name"
+else
+    tmux attach-session -t "$selected_name"
+fi

@@ -1,245 +1,280 @@
+local M = { vi = {} }
+
+M.vi.text = {
+  n = 'NORMAL',
+  no = 'NORMAL',
+  i = 'INSERT',
+  v = 'VISUAL',
+  V = 'V-LINE',
+  [''] = 'V-BLOCK',
+  c = 'COMMAND',
+  cv = 'COMMAND',
+  ce = 'COMMAND',
+  R = 'REPLACE',
+  Rv = 'REPLACE',
+  s = 'SELECT',
+  S = 'SELECT',
+  [''] = 'SELECT',
+  t = 'TERMINAL',
+}
+
+M.vi.colors = {
+  n = 'FlnViCyan',
+  no = 'FlnViCyan',
+  i = 'FlnStatus',
+  v = 'FlnViMagenta',
+  V = 'FlnViMagenta',
+  [''] = 'FlnViMagenta',
+  R = 'FlnViRed',
+  Rv = 'FlnViRed',
+  r = 'FlnViBlue',
+  rm = 'FlnViBlue',
+  s = 'FlnViMagenta',
+  S = 'FlnViMagenta',
+  [''] = 'FelnMagenta',
+  c = 'FlnViYellow',
+  ['!'] = 'FlnViBlue',
+  t = 'FlnViBlue',
+}
+
+M.vi.sep = {
+  n = 'FlnCyan',
+  no = 'FlnCyan',
+  i = 'FlnStatusBg',
+  v = 'FlnMagenta',
+  V = 'FlnMagenta',
+  [''] = 'FlnMagenta',
+  R = 'FlnRed',
+  Rv = 'FlnRed',
+  r = 'FlnBlue',
+  rm = 'FlnBlue',
+  s = 'FlnMagenta',
+  S = 'FlnMagenta',
+  [''] = 'FelnMagenta',
+  c = 'FlnYellow',
+  ['!'] = 'FlnBlue',
+  t = 'FlnBlue',
+}
+
+M.icons = {
+  locker = '', -- #f023
+  page = '☰', -- 2630
+  line_number = '', -- e0a1
+  connected = '', -- f817
+  dos = '', -- e70f
+  unix = '', -- f17c
+  mac = '', -- f179
+  mathematical_L = '𝑳',
+  vertical_bar = '┃',
+  vertical_bar_thin = '│',
+  left = '',
+  right = '',
+  block = '█',
+  left_filled = '',
+  right_filled = '',
+  slant_left = '',
+  slant_left_thin = '',
+  slant_right = '',
+  slant_right_thin = '',
+  slant_left_2 = '',
+  slant_left_2_thin = '',
+  slant_right_2 = '',
+  slant_right_2_thin = '',
+  left_rounded = '',
+  left_rounded_thin = '',
+  right_rounded = '',
+  right_rounded_thin = '',
+  circle = '●',
+}
+local fmt = string.format
+require('lsp_status').register_progress()
+
+-- "┃", "█", "", "", "", "", "", "", "●"
+
+local get_diag = function(str)
+  local count = vim.lsp.diagnostic.get_count(0, str)
+  return (count > 0) and ' ' .. count .. ' ' or ''
+end
+
+local function vi_mode_hl()
+  return M.vi.colors[vim.fn.mode()] or 'FlnViBlack'
+end
+
+local function vi_sep_hl()
+  return M.vi.sep[vim.fn.mode()] or 'FlnBlack'
+end
+
+local c = {
+  vimode = {
+    provider = function()
+      return string.format(' %s ', M.vi.text[vim.fn.mode()])
+    end,
+    hl = vi_mode_hl,
+    right_sep = { str = ' ', hl = vi_sep_hl },
+  },
+  gitbranch = {
+    provider = 'git_branch',
+    icon = ' ',
+    hl = 'FlnGitBranch',
+    right_sep = { str = '  ', hl = 'FlnGitBranch' },
+    enabled = function()
+      return vim.b.gitsigns_status_dict ~= nil
+    end,
+  },
+  file_type = {
+    provider = function()
+      return fmt(' %s ', vim.bo.filetype:upper())
+    end,
+    hl = 'FlnAlt',
+  },
+  fileinfo = {
+    provider = { name = 'file_info', opts = { type = 'relative' } },
+    hl = 'FlnAlt',
+    left_sep = { str = ' ', hl = 'FlnAltSep' },
+    right_sep = { str = '', hl = 'FlnAltSep' },
+  },
+  file_enc = {
+    provider = function()
+      local os = M.icons[vim.bo.fileformat] or ''
+      return fmt(' %s %s ', os, vim.bo.fileencoding)
+    end,
+    hl = 'StatusLine',
+    left_sep = { str = M.icons.left_filled, hl = 'FlnAltSep' },
+  },
+  cur_position = {
+    provider = function()
+      -- TODO: What about 4+ diget line numbers?
+      return fmt(' %3d:%-2d ', unpack(vim.api.nvim_win_get_cursor(0)))
+    end,
+    hl = vi_mode_hl,
+    left_sep = { str = M.icons.left_filled, hl = vi_sep_hl },
+  },
+  cur_percent = {
+    provider = function()
+      return ' ' .. require('feline.providers.cursor').line_percentage() .. '  '
+    end,
+    hl = vi_mode_hl,
+    left_sep = { str = M.icons.left, hl = vi_mode_hl },
+  },
+  default = { -- needed to pass the parent StatusLine hl group to right hand side
+    provider = '',
+    hl = 'StatusLine',
+  },
+  lsp_status = {
+    provider = function()
+      return require('lsp-status').status()
+    end,
+    hl = 'FlnStatus',
+    left_sep = { str = '', hl = 'FlnStatusBg', always_visible = true },
+    right_sep = { str = '', hl = 'FlnErrorStatus', always_visible = true },
+  },
+  lsp_error = {
+    provider = function()
+      return get_diag 'Error'
+    end,
+    hl = 'FlnError',
+    right_sep = { str = '', hl = 'FlnWarnError', always_visible = true },
+  },
+  lsp_warn = {
+    provider = function()
+      return get_diag 'Warning'
+    end,
+    hl = 'FlnWarn',
+    right_sep = { str = '', hl = 'FlnInfoWarn', always_visible = true },
+  },
+  lsp_info = {
+    provider = function()
+      return get_diag 'Information'
+    end,
+    hl = 'FlnInfo',
+    right_sep = { str = '', hl = 'FlnHintInfo', always_visible = true },
+  },
+  lsp_hint = {
+    provider = function()
+      return get_diag 'Hint'
+    end,
+    hl = 'FlnHint',
+    right_sep = { str = '', hl = 'FlnBgHint', always_visible = true },
+  },
+
+  in_fileinfo = {
+    provider = 'file_info',
+    hl = 'StatusLine',
+  },
+  in_position = {
+    provider = 'position',
+    hl = 'StatusLine',
+  },
+}
+
+local active = {
+  { -- left
+    c.vimode,
+    c.gitbranch,
+    c.fileinfo,
+    c.default, -- must be last
+  },
+  { -- right
+    c.lsp_status,
+    c.lsp_error,
+    c.lsp_warn,
+    c.lsp_info,
+    c.lsp_hint,
+    c.file_type,
+    c.file_enc,
+    c.cur_position,
+    c.cur_percent,
+  },
+}
+
+local inactive = {
+  { c.in_fileinfo }, -- left
+  { c.in_position }, -- right
+}
+
+-- -- Define autocmd that generates the highlight groups from the new colorscheme
+-- -- Then reset the highlights for feline
+-- edn.aug.FelineColorschemeReload = {
+--   {
+--     { "SessionLoadPost", "ColorScheme" },
+--     function()
+--       require("eden.modules.ui.feline.colors").gen_highlights()
+--       -- This does not look like it is required. If this is called I see the ^^^^^^ that
+--       -- seperates the two sides of the bar. Since the entire config uses highlight groups
+--       -- all that is required is to redefine them.
+--       -- require("feline").reset_highlights()
+--     end,
+--   },
+-- }
 return {
-  'freddiehaddad/feline.nvim',
-  opts = {},
-  config = function(_, opts)
-    -- require('feline').setup()
-    -- require('feline').winbar.setup() -- to use winbar
-    -- require('feline').statuscolumn.setup() -- to use statuscolumn
+  'feline-nvim/feline.nvim',
 
-    -- require('feline').use_theme() -- to use a custom theme
-    local line_ok, feline = pcall(require, 'feline')
-    if not line_ok then
-      return
-    end
-
-    local color_palette = {
-      fg = '#abb2bf',
-      bg = '#1e2024',
-      green = '#56949f',
-      yellow = '#f6d5a4',
-      purple = '#907aa9',
-      orange = '#d19a66',
-      peanut = '#f6d5a4',
-      red = '#b4637a',
-      aqua = '#d19a66',
-      darkblue = '#282c34',
-      dark_red = '#f75f5f',
-    }
-
-    local vi_mode_colors = {
-      NORMAL = 'green',
-      OP = 'green',
-      INSERT = 'yellow',
-      VISUAL = 'purple',
-      LINES = 'orange',
-      BLOCK = 'dark_red',
-      REPLACE = 'red',
-      COMMAND = 'aqua',
-    }
-
-    local c = {
-      vim_mode = {
-        provider = {
-          name = 'vi_mode',
-          opts = {
-            show_mode_name = true,
-            -- padding = "center", -- Uncomment for extra padding.
-          },
+  config = function()
+    require('feline').setup {
+      components = { active = active, inactive = inactive },
+      highlight_reset_triggers = {},
+      force_inactive = {
+        filetypes = {
+          'NvimTree',
+          'packer',
+          'dap-repl',
+          'dapui_scopes',
+          'dapui_stacks',
+          'dapui_watches',
+          'dapui_repl',
+          'LspTrouble',
+          'qf',
+          'help',
         },
-        hl = function()
-          return {
-            fg = require('feline.providers.vi_mode').get_mode_color(),
-            bg = 'darkblue',
-            style = 'bold',
-            name = 'NeovimModeHLColor',
-          }
-        end,
-        left_sep = 'block',
-        right_sep = 'block',
+        buftypes = { 'terminal' },
+        bufnames = {},
       },
-      gitBranch = {
-        provider = 'git_branch',
-        hl = {
-          fg = 'peanut',
-          bg = 'darkblue',
-          style = 'bold',
-        },
-        left_sep = 'block',
-        right_sep = 'block',
-      },
-      gitDiffAdded = {
-        provider = 'git_diff_added',
-        hl = {
-          fg = 'green',
-          bg = 'darkblue',
-        },
-        left_sep = 'block',
-        right_sep = 'block',
-      },
-      gitDiffRemoved = {
-        provider = 'git_diff_removed',
-        hl = {
-          fg = 'red',
-          bg = 'darkblue',
-        },
-        left_sep = 'block',
-        right_sep = 'block',
-      },
-      gitDiffChanged = {
-        provider = 'git_diff_changed',
-        hl = {
-          fg = 'fg',
-          bg = 'darkblue',
-        },
-        left_sep = 'block',
-        right_sep = 'right_filled',
-      },
-      separator = {
-        provider = '',
-      },
-      fileinfo = {
-        provider = {
-          name = 'file_info',
-          opts = {
-            type = 'relative-short',
-          },
-        },
-        hl = {
-          fg = 'peanut',
-          style = 'bold',
-        },
-        left_sep = ' ',
-        right_sep = ' ',
-      },
-      diagnostic_errors = {
-        provider = 'diagnostic_errors',
-        hl = {
-          fg = 'red',
+      disable = {
+        filetypes = {
+          'dashboard',
+          'startify',
         },
       },
-      -- diagnostic_warnings = {
-      --   provider = 'diagnostic_warnings',
-      --   hl = {
-      --     fg = 'yellow',
-      --   },
-      -- },
-      -- diagnostic_hints = {
-      --   provider = 'diagnostic_hints',
-      --   hl = {
-      --     fg = 'aqua',
-      --   },
-      -- },
-      -- diagnostic_info = {
-      --   provider = 'diagnostic_info',
-      -- },
-      lsp_client_names = {
-        provider = 'lsp_client_names',
-        hl = {
-          fg = 'purple',
-          bg = 'darkblue',
-          style = 'bold',
-        },
-        left_sep = 'left_filled',
-        right_sep = 'block',
-      },
-      file_type = {
-        provider = {
-          name = 'file_type',
-          opts = {
-            -- filetype_icon = true,
-            case = 'titlecase',
-          },
-        },
-        hl = {
-          fg = 'red',
-          bg = 'darkblue',
-          style = 'bold',
-        },
-        left_sep = 'block',
-        right_sep = 'block',
-      },
-      file_encoding = {
-        provider = 'file_encoding',
-        hl = {
-          fg = 'orange',
-          bg = 'darkblue',
-          style = 'italic',
-        },
-        left_sep = 'block',
-        right_sep = 'block',
-      },
-      position = {
-        provider = 'position',
-        hl = {
-          fg = 'green',
-          bg = 'darkblue',
-          style = 'bold',
-        },
-        left_sep = 'block',
-        right_sep = 'block',
-      },
-      line_percentage = {
-        provider = 'line_percentage',
-        hl = {
-          fg = 'green',
-          bg = 'darkblue',
-          style = 'bold',
-        },
-        left_sep = 'block',
-        right_sep = 'block',
-      },
-      -- scroll_bar = {
-      --   provider = 'scroll_bar',
-      --   hl = {
-      --     fg = 'yellow',
-      --     style = 'bold',
-      --   },
-      -- },
-    }
-
-    local left = {
-      c.vim_mode,
-      c.gitBranch,
-      c.gitDiffAdded,
-      c.gitDiffRemoved,
-      c.gitDiffChanged,
-      c.separator,
-    }
-
-    local middle = {
-      c.fileinfo,
-    }
-
-    local right = {
-      c.diagnostic_errors,
-      -- c.diagnostic_warnings,
-      -- c.diagnostic_hints,
-      -- c.diagnostic_info,
-      c.lsp_client_names,
-      c.file_type,
-      c.file_encoding,
-      c.position,
-      c.line_percentage,
-      c.scroll_bar,
-    }
-
-    local components = {
-      active = {
-        left,
-        middle,
-        right,
-      },
-      inactive = {
-        left,
-        middle,
-        right,
-      },
-    }
-
-    feline.setup {
-      components = components,
-      theme = color_palette,
-      vi_mode_colors = vi_mode_colors,
     }
   end,
 }
