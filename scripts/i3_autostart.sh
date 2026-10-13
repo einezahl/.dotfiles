@@ -46,7 +46,8 @@ try_launch flatpak run app.zen_browser.zen \
     || try_launch "$HOME/tools/browser/zen-x86_64.AppImage" \
     || echo "i3_autostart: zen not found" >&2
 
-try_launch obsidian || echo "i3_autostart: obsidian not found" >&2
+# The wrapper adds the 4K scale factor and logs if obsidian is missing.
+"$HOME/.dotfiles/scripts/obsidian.sh" &
 
 try_launch keepassxc || echo "i3_autostart: keepassxc not found" >&2
 

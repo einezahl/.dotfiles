@@ -58,6 +58,23 @@ ln -sf "$PWD/zathura" "$XDG_CONFIG_HOME"/zathura
 ln -sf "$PWD/CLAUDE.md" "$HOME"/.claude/CLAUDE.md
 ln -sf "$PWD/ml-projects.md" "$HOME"/.claude/ml-projects.md
 
+# Shadow the snap's Obsidian desktop entry (same file name, higher XDG
+# precedence) so rofi and obsidian:// links go through the scaling wrapper.
+# Written rather than symlinked because Exec needs an absolute path.
+mkdir -p "$HOME"/.local/share/applications
+cat > "$HOME"/.local/share/applications/obsidian_obsidian.desktop <<EOF
+[Desktop Entry]
+Name=Obsidian
+Exec=$PWD/scripts/obsidian.sh %U
+Terminal=false
+Type=Application
+Icon=/snap/obsidian/current/meta/gui/obsidian.png
+StartupWMClass=md.obsidian.Obsidian
+Comment=Obsidian
+MimeType=x-scheme-handler/obsidian;
+Categories=Office;
+EOF
+
 # Per-machine profile: read $PWD/.machine (4k|hd). Prompt once if missing.
 if [ ! -f "$PWD/.machine" ]; then
 	echo "No .machine flag found. Pick this machine's profile:"
