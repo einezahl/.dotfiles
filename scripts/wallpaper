@@ -83,7 +83,17 @@ fi
 
 case "$OSTYPE" in
     darwin*)
-        osascript -e "tell application \"System Events\" to set picture of every desktop to POSIX file \"$choice\""
+        # NSWorkspace instead of System Events: on macOS 14+ the AppleScript
+        # route only updates the current space, this one sets the display's
+        # default that every space without its own override follows.
+        osascript -l JavaScript -e '
+            ObjC.import("AppKit");
+            var ws = $.NSWorkspace.sharedWorkspace;
+            var url = $.NSURL.fileURLWithPath("'"$choice"'");
+            var screens = $.NSScreen.screens;
+            for (var i = 0; i < screens.count; i++) {
+                ws.setDesktopImageURLForScreenOptionsError(url, screens.objectAtIndex(i), $(), null);
+            }' >/dev/null
         ;;
     linux*)
         feh --bg-scale "$choice"

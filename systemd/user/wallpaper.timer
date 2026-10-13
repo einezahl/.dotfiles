@@ -1,0 +1,10 @@
+# Run wallpaper.service every hour. Change OnUnitActiveSec and rerun ./setup.
+[Unit]
+Description=Cycle the desktop wallpaper hourly
+
+[Timer]
+OnBootSec=1h
+OnUnitActiveSec=1h
+
+[Install]
+WantedBy=timers.target

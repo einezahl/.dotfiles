@@ -1,0 +1,9 @@
+# Cycle the desktop wallpaper once (scripts/wallpaper). Started by wallpaper.timer.
+# Installed by ./setup into ~/.config/systemd/user on Linux.
+[Unit]
+Description=Next desktop wallpaper
+
+[Service]
+Type=oneshot
+Environment=DISPLAY=:0
+ExecStart=%h/.local/bin/wallpaper next

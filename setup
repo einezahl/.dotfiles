@@ -90,11 +90,29 @@ case "$OSTYPE" in
         link .aerospace.toml "$HOME/.aerospace.toml"
         link yabai           "$CONFIG/yabai"
         link skhd            "$CONFIG/skhd"
+
+        # hourly wallpaper change: launchd agent, generated from the template
+        # because launchd needs absolute paths
+        agent="$HOME/Library/LaunchAgents/com.einezahl.wallpaper.plist"
+        mkdir -p "$(dirname "$agent")"
+        launchctl bootout "gui/$(id -u)" "$agent" 2>/dev/null || true
+        sed "s|__HOME__|$HOME|g" "$DOTFILES/launchd/com.einezahl.wallpaper.plist" > "$agent"
+        launchctl bootstrap "gui/$(id -u)" "$agent"
+        echo "loaded launchd agent com.einezahl.wallpaper"
         ;;
     linux*)
         for d in i3 polybar rofi dunst picom; do
             link "$d" "$CONFIG/$d"
         done
+
+        # hourly wallpaper change: systemd user timer
+        if command -v systemctl >/dev/null 2>&1; then
+            link systemd/user/wallpaper.service "$CONFIG/systemd/user/wallpaper.service"
+            link systemd/user/wallpaper.timer   "$CONFIG/systemd/user/wallpaper.timer"
+            systemctl --user daemon-reload
+            systemctl --user enable --now wallpaper.timer
+            echo "enabled systemd timer wallpaper.timer"
+        fi
         ;;
 esac
 
