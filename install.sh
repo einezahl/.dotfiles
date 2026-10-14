@@ -145,6 +145,15 @@ cp ~/.local/kitty.app/share/applications/kitty-open.desktop ~/.local/share/appli
 sed -i "s|Icon=kitty|Icon=/home/$USER/.local/kitty.app/share/icons/hicolor/256x256/apps/kitty.png|g" ~/.local/share/applications/kitty*.desktop
 sed -i "s|Exec=kitty|Exec=/home/$USER/.local/kitty.app/bin/kitty|g" ~/.local/share/applications/kitty*.desktop
 
+# 0xProto Nerd Font: used by the cuts polybar theme (machines/*/polybar.ini).
+# Not in apt; install the Nerd Fonts release into the user font folder.
+if ! fc-list | grep -qi 0xproto; then
+    mkdir -p ~/.local/share/fonts/0xProto
+    curl -L https://github.com/ryanoasis/nerd-fonts/releases/latest/download/0xProto.tar.xz \
+        | tar xJ -C ~/.local/share/fonts/0xProto
+    fc-cache -f ~/.local/share/fonts
+fi
+
 # powerlevel10k theme for zsh (cloned into the dotfiles repo; gitignored)
 if [ ! -d ~/.dotfiles/zsh/powerlevel10k ]; then
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.dotfiles/zsh/powerlevel10k
