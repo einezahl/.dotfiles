@@ -51,7 +51,7 @@ assign [instance="thesis-tmux"]      → number 2
 # previews work. The loop restarts yazi after `q` so the window never closes.
 for_window [instance="yazi-scratch"] floating enable, resize set 80 ppt 80 ppt, move position center, move scratchpad
 exec --no-startup-id kitty --name yazi-scratch zsh -c 'while true; do yazi; done'
-bindsym $mod+m [instance="yazi-scratch"] scratchpad show
+bindsym $mod+m [instance="yazi-scratch"] scratchpad show, resize set 80 ppt 80 ppt, move position center
 
 # launch desktop apps (incl. the thesis workspace); the assign rules above route them to the right workspace
 exec --no-startup-id $HOME/.dotfiles/scripts/i3_autostart.sh
