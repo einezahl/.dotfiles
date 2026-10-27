@@ -268,7 +268,7 @@ return {
       window = {
         mappings = {
           ['<bs>'] = 'navigate_up',
-          ['h'] = 'navigate_up',
+          ['h'] = 'close_node', -- collapse this folder, or the parent when on a file
           ['.'] = 'set_root',
           ['H'] = 'toggle_hidden',
           ['/'] = 'fuzzy_finder',
