@@ -108,12 +108,14 @@ if needs_install bw "$bw_current" "$BW_VER"; then
     rm /tmp/bw.zip
 fi
 
-# fzf: yazi's `z` (zoxide) and `Z` pickers pass options that apt's fzf 0.29
-# rejects (e.g. --scrollbar), so the picker exits instantly. Install the latest
-# static binary to ~/.local/bin (no sudo), which shadows /usr/bin/fzf on PATH.
+# fzf: yazi's `z`/`Z` pickers need a recent fzf. Apt's version draws its UI on
+# stderr (which yazi discards) or rejects options, so the picker shows nothing.
+# Install the latest static binary to ~/.local/bin (no sudo), which shadows
+# /usr/bin/fzf on PATH. Check that binary explicitly: the i3 yazi scratchpad
+# does not load .zshrc, so a Homebrew fzf found on the shell PATH does not help.
 fzf_latest=$(curl -s https://api.github.com/repos/junegunn/fzf/releases/latest \
     | grep -oE '"tag_name": *"v?[^"]+"' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-fzf_current=$(fzf --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1)
+fzf_current=$("$HOME/.local/bin/fzf" --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1)
 if needs_install fzf "$fzf_current" "$fzf_latest"; then
     mkdir -p "$HOME/.local/bin"
     curl -L "https://github.com/junegunn/fzf/releases/download/v${fzf_latest}/fzf-${fzf_latest}-linux_amd64.tar.gz" \
