@@ -1,4 +1,4 @@
-# Image inspection under the `i` prefix (unbound in yazi's defaults).
+# Image inspection and Obsidian helpers under the `i` prefix (unbound in yazi's defaults).
 
 [[mgr.prepend_keymap]]
 on = ["i", "i"]
@@ -19,3 +19,8 @@ desc = "IPython with hovered image loaded as img"
 on = ["i", "e"]
 run = "shell --orphan -- ~/.dotfiles/scripts/image_edit.sh %h"
 desc = "Edit hovered image in ksnip"
+
+[[mgr.prepend_keymap]]
+on = ["i", "a"]
+run = "shell --block -- ~/.dotfiles/scripts/obsidian_attach.sh %h -- %s"
+desc = "Copy selected (or hovered) files to the Obsidian _attachments directory"
