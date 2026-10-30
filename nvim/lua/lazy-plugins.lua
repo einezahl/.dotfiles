@@ -35,6 +35,7 @@ require('lazy').setup({
   -- require 'plugins.custom.lazygit',
   require 'plugins.custom.neo-tree',
   require 'plugins.custom.image',
+  require 'plugins.custom.csvview',
   -- require 'plugins.custom.toggleterm',
 
   -- Kickstart standard plugins
