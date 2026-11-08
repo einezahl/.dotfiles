@@ -11,20 +11,19 @@ fi
 
 # Per-machine project layout, so each machine can describe its own structure.
 # The file is sourced as bash and may override project_roots and
-# remote_projects; the defaults below apply when it is absent. The tracked
-# machines/<name>/sessionizer.sh is used first; an untracked
-# ~/.config/tmux-sessionizer/config.sh still works for layouts that should not
-# be in git.
-config_file="$HOME/.dotfiles/machine/sessionizer.sh"
+# remote_projects; the defaults below apply when neither file exists. An
+# untracked ~/.config/tmux-sessionizer/config.sh wins when present, so a
+# layout that should not be in git overrides the tracked
+# machines/<name>/sessionizer.sh.
+config_file="$HOME/.config/tmux-sessionizer/config.sh"
 if [[ ! -f $config_file ]]; then
-    config_file="$HOME/.config/tmux-sessionizer/config.sh"
+    config_file="$HOME/.dotfiles/machine/sessionizer.sh"
 fi
 
 # Format: "root|depth". Every directory exactly `depth` levels below `root` is a
 # project; depth 0 makes `root` itself a project. New projects are created under
 # the first root.
 project_roots=(
-    "$HOME/dev|3"
     "$HOME/.dotfiles|0"
 )
 
