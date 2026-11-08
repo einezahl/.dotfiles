@@ -29,8 +29,10 @@ yabai -m config window_gap 0
 
 # focus a window on the target space after switching, so keyboard focus
 # follows the switch (macOS otherwise keeps the previous app active).
-# Needs jq.
-yabai -m signal --add event=space_changed action='yabai -m window --focus "$(yabai -m query --windows --space | jq -r ".[0].id")" 2>/dev/null || true'
+# Hidden scratchpad windows stay listed on the space they were last shown on
+# and get re-shown when focused, so skip them (and minimized windows). Needs jq.
+yabai -m signal --add event=space_changed label=focus_after_space_change \
+    action='yabai -m window --focus "$(yabai -m query --windows --space | jq -r "[.[] | select(.scratchpad == \"\" and (.[\"is-minimized\"] | not))][0].id")" 2>/dev/null || true'
 
 # leave small system windows alone
 # app names are localized (German UI), match both; the German name may
@@ -38,5 +40,14 @@ yabai -m signal --add event=space_changed action='yabai -m window --focus "$(yab
 yabai -m rule --add app="System.*(Settings|einstellungen)" manage=off
 yabai -m rule --add app="^(Calculator|Rechner)$" manage=off
 yabai -m rule --add app="^Archive Utility$" manage=off
+
+# yazi scratchpad (cmd - m in skhd, see scripts/yazi_scratchpad.sh): the kitty
+# window titled yazi-scratch floats at 80% of the screen, centered, and is
+# shown/hidden on the current space with `yabai -m window --toggle yazi`.
+yabai -m rule --add app="^kitty$" title="^yazi-scratch$" scratchpad=yazi grid=10:10:1:1:8:8
+
+# Rules only apply to new windows; re-apply them so an already open yazi
+# scratchpad keeps its label across a restart (alt + shift - c).
+yabai -m rule --apply
 
 echo "yabai config loaded"

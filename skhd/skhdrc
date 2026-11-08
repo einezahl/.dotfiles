@@ -1,5 +1,7 @@
 # skhd config — ported from i3.
-# Note: skhd hot-reloads this file on save; yabai needs alt+shift-c (below).
+# Note: skhd's hot-reload does not fire here because ~/.config/skhd is a
+# symlink into this repo (file events carry the real path). After editing,
+# run `skhd --restart-service`. yabai needs alt+shift-c (below).
 # 0x29 is the keycode for semicolon (skhd has no named key for it).
 
 # ---- launchers ----
@@ -7,6 +9,9 @@ alt - return : open -na kitty --args --single-instance -d ~
 cmd + shift - s : open -n -a Safari
 # app launcher, like rofi in i3
 cmd - d : open -a Sol
+# yazi scratchpad, like $mod+m in i3 (skhd swallows the key, so kitty's own
+# cmd+m = minimize never fires while skhd runs)
+cmd - m : ~/.dotfiles/scripts/yazi_scratchpad.sh
 
 # ---- focus, i3 home-row style (falls back to next display at the edge) ----
 alt - j : yabai -m window --focus west  || yabai -m display --focus west
