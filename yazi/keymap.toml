@@ -14,3 +14,10 @@ desc = "Image overview of the current directory"
 on = ["i", "p"]
 run = "shell --block -- ~/.dotfiles/scripts/image_shell.py %h"
 desc = "IPython with hovered image loaded as img"
+
+# Copy the selected (or hovered) files to the system clipboard as file
+# objects, so they can be pasted into GUI apps (PowerPoint, mail, ...).
+[[mgr.prepend_keymap]]
+on = ["c", "y"]
+run = 'shell -- ~/.dotfiles/scripts/yazi_copy_files.sh "$@"'
+desc = "Copy files to the system clipboard"
