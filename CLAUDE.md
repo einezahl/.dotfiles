@@ -48,7 +48,7 @@ Every config that differs per machine includes a file from the `machine` symlink
   - `lua/plugins/custom/` — personal plugin specs (harpoon, oil, neo-tree, obsidian, rose-pine, feline, tmux-navigator, …)
   To add or remove a plugin, edit `lua/lazy-plugins.lua` — it is the single source of truth for what is loaded. Paths inside nvim must stay portable (`vim.fn.expand '~/...'`, `vim.fn.has 'mac'`), not `/Users/...`.
 - `alacritty.toml`, `kitty/` — terminal configs (UbuntuMono Nerd Font); size comes from the machine file.
-- `yazi/`, `git/ignore`, `scripts/` — shared tools. yazi openers have a Linux and a macOS entry each; `i i`/`i d`/`i p` in yazi run `scripts/image_info.py` and `scripts/image_shell.py`.
+- `yazi/`, `git/ignore`, `scripts/` — shared tools. yazi openers have a Linux and a macOS entry each; `i i`/`i d`/`i p` in yazi run `scripts/image_info.py` and `scripts/image_shell.py`, `i e` opens the hovered image in ksnip (`scripts/image_edit.sh`), `i a` copies selected or hovered files to the Obsidian `_attachments` directory (`scripts/obsidian_attach.sh`, override with `OBSIDIAN_ATTACHMENTS`).
 - `claude/` — global Claude Code preferences, linked to `~/.claude/` by `./setup`. Not guidance for this repo; that is this file.
 - `lazygit/`, `glow/`, `crossnote/`, `uv/`, `swiftpm/`, `homebrew/`, `.android/`, `github-copilot/` — tool state that lands here because `XDG_CONFIG_HOME` points at this repo; all `.gitignore`d.
 
