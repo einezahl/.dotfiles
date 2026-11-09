@@ -39,3 +39,6 @@ uv/
 opencode/node_modules/
 .claude/settings.local.json
 .claude/**.local.json
+
+__pycache__/
+.nvimlog
