@@ -19,7 +19,7 @@ desc = "IPython with hovered image loaded as img"
 # objects, so they can be pasted into GUI apps (PowerPoint, mail, ...).
 [[mgr.prepend_keymap]]
 on = ["c", "y"]
-run = 'shell -- ~/.dotfiles/scripts/yazi_copy_files.sh "$@"'
+run = 'shell -- ~/.dotfiles/scripts/yazi_copy_files.sh %s'
 desc = "Copy files to the system clipboard"
 
 [[mgr.prepend_keymap]]
