@@ -8,15 +8,15 @@ sort_dir_first = true
 
 [opener]
 edit = [
-  { run = '$EDITOR "$@"', desc = "Edit in $EDITOR", block = true },
+  { run = '${EDITOR:-nvim} %s', desc = "Edit in $EDITOR", block = true },
 ]
 pdf = [
-  { run = 'evince "$@"', desc = "Open in Evince", orphan = true, for = "linux" },
-  { run = 'open "$@"', desc = "Open", orphan = true, for = "macos" },
+  { run = 'evince %s', desc = "Open in Evince", orphan = true, for = "linux" },
+  { run = 'open %s', desc = "Open", orphan = true, for = "macos" },
 ]
 image = [
-  { run = 'eog "$@"', desc = "Open in Eye of GNOME", orphan = true, for = "linux" },
-  { run = 'open "$@"', desc = "Open", orphan = true, for = "macos" },
+  { run = 'eog %s', desc = "Open in Eye of GNOME", orphan = true, for = "linux" },
+  { run = 'open %s', desc = "Open", orphan = true, for = "macos" },
 ]
 
 [open]
