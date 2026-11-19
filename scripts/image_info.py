@@ -18,8 +18,10 @@ side in their color), and the unique values (color tuples for RGB) with their
 pixel counts if there are at most 10, e.g. for segmentation masks.
 """
 
+import os
 import sys
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -40,7 +42,19 @@ CHANNEL_COLORS = ["\033[91m", "\033[92m", "\033[94m", ""]
 RESET = "\033[0m"
 DIRECTORY_MAX_LISTED = 50
 DIRECTORY_MAX_LOADED = 50
+# Images decoded concurrently for the directory overview. Decoding and the
+# numpy passes release the GIL, so threads help; the cap bounds memory, since
+# every worker holds one full image.
+DIRECTORY_LOAD_THREADS = min(4, os.cpu_count() or 1)
 SAMPLE_PIXELS_PER_IMAGE = 100_000
+# Largest value range for which pixels are counted per value (np.bincount, one
+# pass) instead of sorted (np.unique, np.percentile, np.histogram). 2^24 counts
+# is 128 MiB; 8 and 16 bit images always qualify.
+COUNTS_MAX_VALUES = 2**24
+
+# Pixel counts per value for one channel (index == value), or None when the
+# channel's values do not fit a small non-negative integer range.
+Counts = np.ndarray | None
 
 
 def is_image(path: Path) -> bool:
@@ -82,6 +96,76 @@ def format_number(value: float) -> str:
     return f"{value:.4g}"
 
 
+def value_counts(channel: np.ndarray) -> Counts:
+    """Count the pixels of each value in one pass, or return None for other data.
+
+    Works for integer channels whose values lie in 0..COUNTS_MAX_VALUES-1 (8 and
+    16 bit images always do). The result has one entry per value, so
+    `counts[v]` is the number of pixels with value `v`. Everything the script
+    reports about a channel (unique values, statistics, percentiles, histogram,
+    clipping) is derived from these counts; the sort-based numpy functions are
+    only the fallback for floats and other wide ranges and take 100x longer on
+    large images.
+    """
+    if not np.issubdtype(channel.dtype, np.integer) or channel.size == 0:
+        return None
+    if np.issubdtype(channel.dtype, np.unsignedinteger) and channel.dtype.itemsize <= 2:
+        return np.bincount(channel.ravel(), minlength=int(np.iinfo(channel.dtype).max) + 1)
+    low = int(channel.min())
+    high = int(channel.max())
+    if low < 0 or high >= COUNTS_MAX_VALUES:
+        return None
+    return np.bincount(channel.ravel(), minlength=high + 1)
+
+
+def counts_range(counts: np.ndarray) -> tuple[int, int]:
+    """Return the smallest and largest value with a non-zero count."""
+    present = np.flatnonzero(counts)
+    return int(present[0]), int(present[-1])
+
+
+def counts_mean_std(counts: np.ndarray) -> tuple[float, float]:
+    """Return mean and population standard deviation (like ndarray.std) from counts."""
+    values = np.arange(len(counts), dtype=np.float64)
+    total = counts.sum()
+    mean = float(np.dot(counts, values) / total)
+    variance = float(np.dot(counts, (values - mean) ** 2) / total)
+    return mean, float(np.sqrt(variance))
+
+
+def counts_percentiles(counts: np.ndarray, percentiles: list[float]) -> list[float]:
+    """Return percentiles from counts, interpolating like np.percentile's default.
+
+    np.percentile (method 'linear') places percentile q at sorted position
+    q / 100 * (n - 1) and interpolates between the two neighbouring pixels. The
+    pixel at sorted position k is the smallest value whose cumulative count
+    exceeds k.
+    """
+    cumulative = np.cumsum(counts)
+    total = int(cumulative[-1])
+
+    def value_at(position: int) -> float:
+        return float(np.searchsorted(cumulative, position, side="right"))
+
+    results = []
+    for q in percentiles:
+        position = q / 100 * (total - 1)
+        lower = int(np.floor(position))
+        upper = int(np.ceil(position))
+        fraction = position - lower
+        results.append(value_at(lower) + (value_at(upper) - value_at(lower)) * fraction)
+    return results
+
+
+def counts_histogram(counts: np.ndarray, bins: int, low: float, high: float) -> np.ndarray:
+    """Bin the counts like np.histogram(values, bins, range=(low, high)) would."""
+    values = np.arange(len(counts), dtype=np.float64)
+    inside = (values >= low) & (values <= high)
+    index = np.floor((values[inside] - low) / (high - low) * bins).astype(int)
+    index = np.minimum(index, bins - 1)
+    return np.bincount(index, weights=counts[inside], minlength=bins)
+
+
 def describe_bit_depth(img: np.ndarray) -> str:
     """Describe the storage bit depth and, for integers, how many bits the values use.
 
@@ -94,36 +178,63 @@ def describe_bit_depth(img: np.ndarray) -> str:
     return f"{storage_bits} bit (values use {used_bits} bit)"
 
 
-def print_statistics(img: np.ndarray) -> None:
-    """Print min/max/mean/std, percentiles and, for integers, the clipped fraction."""
-    data = img.astype(np.float64)
-    print(f"min / max      {format_number(data.min())} / {format_number(data.max())}")
-    print(f"mean / std     {data.mean():.4g} / {data.std():.4g}")
+def print_statistics(img: np.ndarray, counts: Counts) -> None:
+    """Print min/max/mean/std, percentiles and, for integers, the clipped fraction.
+
+    `counts` are the image's value counts (see value_counts) or None, in which
+    case the values are computed from the pixels directly.
+    """
     percentiles = [0.1, 1, 50, 99, 99.9]
-    values = np.percentile(data, percentiles)
+    if counts is not None:
+        low, high = counts_range(counts)
+        mean, std = counts_mean_std(counts)
+        values = counts_percentiles(counts, percentiles)
+    else:
+        data = img.astype(np.float64)
+        low, high = data.min(), data.max()
+        mean, std = data.mean(), data.std()
+        values = np.percentile(data, percentiles)
+    print(f"min / max      {format_number(low)} / {format_number(high)}")
+    print(f"mean / std     {mean:.4g} / {std:.4g}")
     line = "  ".join(f"p{p:g}={format_number(v)}" for p, v in zip(percentiles, values))
     print(f"percentiles    {line}")
 
     if np.issubdtype(img.dtype, np.integer):
         info = np.iinfo(img.dtype)
-        at_min = np.count_nonzero(img == info.min) / img.size
-        at_max = np.count_nonzero(img == info.max) / img.size
+        if counts is not None:
+            # counts only exist for non-negative values, so a negative info.min
+            # has no pixels; info.max may lie beyond the counted range
+            at_min = int(counts[0]) if info.min == 0 else 0
+            at_max = int(counts[info.max]) if info.max < len(counts) else 0
+        else:
+            at_min = np.count_nonzero(img == info.min)
+            at_max = np.count_nonzero(img == info.max)
+        at_min /= img.size
+        at_max /= img.size
         print(f"clipped        {at_min:.2%} at {info.min}, {at_max:.2%} at {info.max}")
 
 
-def histogram_range(img: np.ndarray) -> tuple[float, float, str, str, str]:
+def channel_range(channel: np.ndarray, counts: Counts) -> tuple[float, float]:
+    """Return a channel's min and max, from the counts when available."""
+    if counts is not None:
+        return counts_range(counts)
+    return float(channel.min()), float(channel.max())
+
+
+def histogram_range(
+    dtype: np.dtype, low: float, high: float
+) -> tuple[float, float, str, str, str]:
     """Return the histogram range, the labels for its two limits, and a depth label.
 
+    `low` and `high` are the smallest and largest value over all channels.
     Non-negative integer images span the full range of their bit depth, so the
     bins are comparable between images: 0..2^n-1 with n the bits the values use
     (at least 8). A 12-bit SEM image stored as uint16 spans 0..4095. Other
     images (floats, signed integers) span their min..max.
     """
-    if np.issubdtype(img.dtype, np.integer) and img.min() >= 0:
-        bits = max(int(img.max()).bit_length(), 8)
+    if np.issubdtype(dtype, np.integer) and low >= 0:
+        bits = max(int(high).bit_length(), 8)
         return 0, 2**bits, "0", str(2**bits - 1), f"{bits} bit"
-    low = float(img.min())
-    high = float(img.max())
     if high == low:
         high = low + 1
     return low, high, format_number(low), format_number(high), "min..max"
@@ -164,17 +275,26 @@ def histogram_panel(
     return [line.ljust(width) for line in lines]
 
 
-def print_histograms(channels: list[np.ndarray], names: list[str], colors: list[str]) -> None:
+def print_histograms(
+    channels: list[np.ndarray], counts: list[Counts], names: list[str], colors: list[str]
+) -> None:
     """Print one histogram per channel side by side, in the channel's color.
 
     All channels share the bin range (from the whole image) and the y-scale.
     Side-by-side panels use narrower bins so three of them fit in one row.
+    `counts` holds each channel's value counts (see value_counts) or None.
     """
-    low, high, low_label, high_label, depth = histogram_range(np.stack(channels))
+    ranges = [channel_range(channel, c) for channel, c in zip(channels, counts)]
+    low, high, low_label, high_label, depth = histogram_range(
+        channels[0].dtype, min(r[0] for r in ranges), max(r[1] for r in ranges)
+    )
     fractions = []
-    for channel in channels:
-        counts, _ = np.histogram(channel, bins=HISTOGRAM_BINS, range=(low, high))
-        fractions.append(counts / channel.size)
+    for channel, channel_counts in zip(channels, counts):
+        if channel_counts is not None:
+            histogram = counts_histogram(channel_counts, HISTOGRAM_BINS, low, high)
+        else:
+            histogram, _ = np.histogram(channel, bins=HISTOGRAM_BINS, range=(low, high))
+        fractions.append(histogram / channel.size)
     peak = max(float(f.max()) for f in fractions)
     if len(channels) == 1:
         bin_columns = HISTOGRAM_BIN_COLUMNS_SINGLE
@@ -242,10 +362,40 @@ def colored(text: str, color: str) -> str:
     return f"{color}{text}{RESET}"
 
 
-def unique_values(img: np.ndarray, channel_count: int) -> tuple[np.ndarray, np.ndarray]:
-    """Return the unique values and their pixel counts; color pixels count as tuples."""
+def unique_values(
+    img: np.ndarray, channels: list[np.ndarray], counts: list[Counts]
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return the unique values and their pixel counts; color pixels count as tuples.
+
+    Single channels come straight from their value counts. Unsigned color
+    pixels are packed into one integer per pixel (red in the high bits) before
+    np.unique, which sorts them ~100x faster than np.unique(axis=0) on rows
+    and in the same lexicographic order. Everything else sorts the rows.
+    """
+    channel_count = len(channels)
     if channel_count == 1:
+        if counts[0] is not None:
+            values = np.flatnonzero(counts[0])
+            return values.astype(img.dtype), counts[0][values]
         return np.unique(img, return_counts=True)
+
+    bits = img.dtype.itemsize * 8
+    if np.issubdtype(img.dtype, np.unsignedinteger) and bits * channel_count <= 64:
+        packed_dtype = np.uint32 if bits * channel_count <= 32 else np.uint64
+        packed = np.zeros(channels[0].size, dtype=packed_dtype)
+        for index, channel in enumerate(channels):
+            shift = bits * (channel_count - 1 - index)
+            packed |= channel.ravel().astype(packed_dtype) << packed_dtype(shift)
+        packed_values, packed_counts = np.unique(packed, return_counts=True)
+        mask = packed_dtype(2**bits - 1)
+        values = np.stack(
+            [
+                (packed_values >> packed_dtype(bits * (channel_count - 1 - index))) & mask
+                for index in range(channel_count)
+            ],
+            axis=1,
+        ).astype(img.dtype)
+        return values, packed_counts
     return np.unique(img.reshape(-1, channel_count), axis=0, return_counts=True)
 
 
@@ -261,19 +411,22 @@ def describe_image(path: Path) -> None:
         return
 
     channels, names, colors = split_channels(img)
-    values, counts = unique_values(img, len(channels))
+    channel_counts = [value_counts(channel) for channel in channels]
+    values, counts = unique_values(img, channels, channel_counts)
     pixel_count = channels[0].size
     if len(channels) == 1:
         print(f"unique values  {len(values):,}")
-        print_statistics(img)
+        print_statistics(img, channel_counts[0])
     else:
         print(f"unique colors  {len(values):,}")
-        for channel, name, color in zip(channels, names, colors):
+        for channel, counts_of_channel, name, color in zip(
+            channels, channel_counts, names, colors
+        ):
             print()
             print(colored(name, color))
-            print_statistics(channel)
+            print_statistics(channel, counts_of_channel)
 
-    print_histograms(channels, names, colors)
+    print_histograms(channels, channel_counts, names, colors)
     print_unique_values(values, counts, pixel_count)
 
 
@@ -309,7 +462,8 @@ def summarize_image(path: Path) -> ImageSummary:
     """Load an image and collect its per-channel statistics and unique values."""
     img = load_image(path)
     channels, _, _ = split_channels(img)
-    values, counts = unique_values(img, len(channels))
+    channel_counts = [value_counts(channel) for channel in channels]
+    values, counts = unique_values(img, channels, channel_counts)
     value_tuples = [tuple(np.atleast_1d(value).tolist()) for value in values]
     return ImageSummary(
         path=path,
@@ -412,7 +566,7 @@ def print_group(summaries: list[ImageSummary]) -> None:
         np.concatenate([s.samples[index] for s in summaries]).astype(first.dtype)
         for index in range(first.channel_count)
     ]
-    print_histograms(pooled, names, colors)
+    print_histograms(pooled, [value_counts(channel) for channel in pooled], names, colors)
 
 
 def count_directory(directory: Path) -> tuple[int, int]:
@@ -515,11 +669,13 @@ def describe_directory(directory: Path) -> None:
 
     loaded = evenly_spaced(readable, DIRECTORY_MAX_LOADED)
     summaries: dict[Path, ImageSummary] = {}
-    for image in loaded:
-        try:
-            summaries[image] = summarize_image(image)
-        except Exception:
-            print(f"failed to load {image.name}")
+    with ThreadPoolExecutor(max_workers=DIRECTORY_LOAD_THREADS) as executor:
+        futures = [executor.submit(summarize_image, image) for image in loaded]
+        for image, future in zip(loaded, futures):
+            try:
+                summaries[image] = future.result()
+            except Exception:
+                print(f"failed to load {image.name}")
 
     print()
     sampled = "all" if len(loaded) == len(readable) else "evenly spaced"
