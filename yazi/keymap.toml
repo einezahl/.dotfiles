@@ -21,6 +21,21 @@ run = "shell --orphan -- ~/.dotfiles/scripts/image_edit.sh %h"
 desc = "Edit hovered image in ksnip"
 
 [[mgr.prepend_keymap]]
+on = ["i", "s"]
+run = "shell --block -- ~/.dotfiles/scripts/image_detect.sh slip %h"
+desc = "Detect slip lines in hovered image"
+
+[[mgr.prepend_keymap]]
+on = ["i", "c"]
+run = "shell --block -- ~/.dotfiles/scripts/image_detect.sh crack %h"
+desc = "Detect cracks in hovered image"
+
+[[mgr.prepend_keymap]]
+on = ["i", "b"]
+run = "shell --block -- ~/.dotfiles/scripts/image_detect.sh both %h"
+desc = "Detect slip lines and cracks in hovered image"
+
+[[mgr.prepend_keymap]]
 on = ["i", "a"]
 run = "shell --block -- ~/.dotfiles/scripts/obsidian_attach.sh %h -- %s"
 desc = "Copy selected (or hovered) files to the Obsidian _attachments directory"
