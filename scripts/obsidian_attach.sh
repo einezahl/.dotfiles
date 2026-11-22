@@ -5,11 +5,16 @@
 #
 # Everything before `--` is the hovered file (zero or one path), everything
 # after it the selected files. Selected files win when there are any, so the
-# yazi binding can pass both and the script decides. Override the destination
-# with OBSIDIAN_ATTACHMENTS. Existing names are never overwritten.
+# yazi binding can pass both and the script decides. The destination comes
+# from `obsidian_attachments` in machines/<name>/obsidian.sh; OBSIDIAN_ATTACHMENTS
+# overrides it. Existing names are never overwritten.
 set -eu
 
-dest="${OBSIDIAN_ATTACHMENTS:-$HOME/Documents/Obsidian/phd/_attachments}"
+obsidian_attachments="$HOME/Documents/Obsidian/phd/_attachments"
+machine_file="$HOME/.dotfiles/machine/obsidian.sh"
+# shellcheck source=/dev/null
+[ -f "$machine_file" ] && . "$machine_file"
+dest="${OBSIDIAN_ATTACHMENTS:-$obsidian_attachments}"
 
 fail() {
   echo "obsidian_attach.sh: $*" >&2
